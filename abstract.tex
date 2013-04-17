@@ -1,0 +1,50 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[estonian]{babel}
+\begin{document}
+\title{Alglaadur ESTCube-1 k"asu- ja andmehalduss"usteemile ja kaameramoodulile}
+\author{Karl Tarbe}
+\maketitle
+
+\begin{abstract}
+T"o"o eesm"argiks on disainida ja implementeerida tudengisatelliidi
+ESTCube-1 kahele alammoodulile alglaadur, mis v~oimaldaks nende
+moodulite tarkvara uuendada ka siis, kui tehiskaaslane on juba orbiidil.
+K"asu- ja andmehalduss"usteemil ja kaameramoodulil on sarnased
+mikrokontrollerid --- vastavalt STM32F1 ja STM32F2 seeriasse kuuluvad,
+mist~ottu saab m~olemal moodulil kasutada "uldjoontes sama
+alglaadurit. 
+
+Maa pealt uue tarkvara vastuv~otmine ja sobivasse kohta paigutamine
+kuulub p~ohitarkavara "ulesannete hulka. Alglaaduri t"o"oks on lugeda
+v"alisest m"alust k"askude nimekiri, k"asud t"aita ning
+seej"arel k"aima panna p~ohitarkvara. 
+
+Toetatud k"aske on v"ahemalt kaks. Esimene on v"alisest m"alust uue tarkvara
+kopeerimine sisemises m"alus olevasse pessa. Teine v~oimaldab valida,
+milline sisemises m"alus olevatest tarkvaradest k"aima panna. 
+
+Alglaadur peab enne iga operatsiooni t"aitmist aruvutama tarkvara
+kontrollsumma ning seda kontrollima, et v"altida vigase tarkvara
+kopeerimist v~oi k"aivitamist.
+
+Samuti peab alglaadur sisemisse m"alusse k~oik oma
+tegevused kirja panema, et p~ohitarkvara saaks hiljem teada alglaaduri
+t"o"os esinenud vigadest ning saaks andmed vigade kohta tagasi maale
+saata. Sisemine m"alu on valitud just sellep"arast, et saaks kirja panna
+vead ka siis, kui suhtlemine v"alimise m"aluga eba~onnestub.
+
+Sisemiseks m"aluks on mikrokontrolleri sees olev FLASH t"u"upi m"alu.
+Kasutusel olevad mikrokontrollerid suudavad programmi k"aivitada ainult
+sisemisest FLASH m"alust v~oi sisemisest SRAM m"alust. Seet~ottu ongi vajalik, et
+alglaadur paigutaks tarkvara sisemisse FLASH m"allu, sest SRAM t"u"upi
+m"alu peab j"a"ama vabaks tarkvara enda t"o"oks. V"alimise m"aluna
+on kasutusel I2C siinil olev mikrokontrollerist v"aljaj"a"av
+ferroelektriline RAM t"u"upi m"alu, mis on kosmoses oleva
+radiatsiooni vastu kordi kindlam, kui teised m"alut"u"ubid.
+
+Samuti v~oib "ara m"arkida, et kasutatavates mikrokontrollerites on sisseehitatud
+moodul kontrollsumma arvutamiseks, mida saab kasutada, et kontrollsumma
+arvutamine kiiremini l"aheks.
+\end{abstract}
+\end{document}
