@@ -1,6 +1,7 @@
 \documentclass[12pt,a4paper]{article}
 \usepackage[utf8]{inputenc}
 \usepackage[estonian]{babel}
+\usepackage{cite}
 
 \title{Alglaadur ESTCube-1 käsu- ja andmehaldussüsteemile ja kaameramoodulile}
 \author{Karl Tarbe}
@@ -30,11 +31,40 @@ Tartu 2013
 \tableofcontents
 
 \section{Sissejuhatus}
+plaasadapldaspdlapdlapsd
+
 \section{Süsteemi nõuded}
 \section{Alglaadimine}
-\subsection{Tavapärane alglaadimis protseduur}
+\subsection{Tavapärane alglaadimisprotseduur}
+Kui mikrokontrolleril toide olemas on üritab see ennast tööle panna.
+Esmalt lülitatakse sisse sisemine 8-MHz-ne ossillaator, mille signaali
+neljandal tõusval frondil loetakse konfigureerimise viikude väärtused. Nende
+väärtuste põhjal otsustatakse, millisest kohast alglaadida. Võimalikud
+variandid on: põhi välkmälu, süsteemi mälu ja staatiline juhupöördlusega
+mälu(SRAM).  Enim kasutatakse kahte esimest: põhi välkmälu seal oleva programmi
+käivitamiseks ja süsteemi mälu, et põhimälu muuta. Tehases paigaldatakse
+süsteemi mällu, mis on tegelikult lihtsalt üks kaitstud osa põhi välkmälu
+lõpust, alglaadur, mille abil saab programmeerida ülejäänud välkmälu ehk oma
+programmi mikrokontrollerile laadida.
 
+Oletades, et programm on juba kiibi välkmälus olemas ja alglaadimist
+alustatakse põhi välkmälust, vaatleme edasist protsessi. Välkmälu aadress on
+tegelikult 0x800 0000, aga viikude oleku tõttu peegeldatakse see ka aadressile
+0x0000 0000, kust protsessor oma tööd alustab.  Protsessor võtab aadressil
+0x0000 0000 oleva väärtuse ja seab selle pinu ülemiseks väärtuseks. Seejärel
+alustatakse instruktsioonide täitmist lähtestamise vektorist, mille
+algusaadress on kirjas aadressil 0x0000 0004. \cite{f1rm}
+
+Lähtestamise vektoril on tavaliselt assembleris kirjutatud protseduur, mis
+kopeerib programmi andmete sektsiooni välkmälust SRAMi, täidab ülejäänud programmi jaoks
+vajaliku ala SRAMist nullidega, kutsub välja C koodis kirjutatud
+protseduuri, mis initsialiseerib süsteemi kella, ja siis annab juhtimise üle C
+koodis kirjutatud \textit{main} protseduurile.
 
 \section{Komponendid}
 \section{Kokkuvõte}
+
+\bibliographystyle{plain}
+\bibliography{viited}
+
 \end{document}
