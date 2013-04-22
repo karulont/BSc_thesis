@@ -177,21 +177,30 @@
 \end{frame}
 
 \begin{frame}{Logimine}
-	\begin{itemize}
-		\item Logi element on 16-bitine.
-		\item Logi asub ühes FLASH mälu lehel.
-		\item Kahendotsinguga leitakse logi lõpp.
-		\item Logi täitumisel jäetakse alles viimased 20 sissekannet.
-	\end{itemize}
+	\begin{block}{Logi ülesehitus}
+		\begin{itemize}
+			\item Logi element on 16-bitine.
+			\item Logi asub ühes FLASH mälu lehel.
+			\item Kahendotsinguga leitakse logi lõpp.
+			\item Logi täitumisel jäetakse alles viimased 20 sissekannet.
+		\end{itemize}
+	\end{block}
+	\begin{block}{Mida logitakse?}
+		\begin{itemize}
+			\item Logi elemendi esimene bait = tüüp.
+			\item Logi elemendi teine bait = argument.
+			\item Logitakse kõik vead.
+		\end{itemize}
+	\end{block}
 \end{frame}
 
 \begin{frame}{Kokkuvõte}
 	\begin{block}{Alglaaduri ülesanded}
 		\begin{itemize}
-			\item Tarkvara terviklikkuse kontrollimine: \alert{CRC-32}
-			\item Tarkvara kopeerimine: \alert{FRAM \(\to\) FLASH}
-			\item Põhitarkvara käivitamine: \alert{Seadista ja hyppa}
-			\item Tegevuste logi salvestamine: \alert{Flash page}
+			\item Tarkvara terviklikkuse kontrollimine: \textbf{CRC-32}
+			\item Tarkvara kopeerimine: \textbf{FRAM \(\to\) FLASH}
+			\item Põhitarkvara käivitamine: \textbf{Jump}
+			\item Tegevuste logi salvestamine: \textbf{1 leht FLASHis}
 		\end{itemize}
 	\end{block}
 \end{frame}
