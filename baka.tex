@@ -59,10 +59,62 @@ alustatakse instruktsioonide täitmist lähtestamise vektorist, mille
 algusaadress on kirjas aadressil 0x0000 0004. \cite{f1rm}
 
 Lähtestamise vektoril on tavaliselt assembleris kirjutatud protseduur, mis
-kopeerib programmi andmete sektsiooni välkmälust SRAMi, täidab ülejäänud programmi jaoks
-vajaliku ala SRAMist nullidega, kutsub välja C koodis kirjutatud
+kopeerib programmi andmete sektsiooni välkmälust SRAMi, täidab ülejäänud
+programmi jaoks vajaliku ala SRAMist nullidega, kutsub välja C koodis kirjutatud
 protseduuri, mis initsialiseerib süsteemi kella, ja siis annab juhtimise üle C
-koodis kirjutatud \textit{main} protseduurile.
+koodis kirjutatud \textit{main} protseduurile. Satelliidi peal ei kasutata
+üldist kella seadmise koodi ja seega see samm jäetakse vahele ning kella
+seadmine kutsutakse välja \textit{main}ist.
+
+See, mida tarkvara edasi initisaliseerib, on juba tarkvara spetsiifiline.
+Tõenäoliselt initsialiseeritakse mõned riistvaralised moodulid näiteks USART või
+SPI ja hakatakse siis rakendusele vajalikku kontrolltsüklit täitma. Satelliidil
+Estcube-1 kasutatakse nii CAMil kui ka CDHSil reaalaja operatsioonisüsteemi
+FreeRTOS.
+
+\subsection{Programmi alglaadimine koos alglaaduriga}
+Alglaadur ise käitub alglaadimise seisukohalt nagu iga teinegi programm ja
+laetakse täpselt samamoodi nagu eelmises alapeatükis kirjeldatud. See tähendab
+seda, et alglaaduri katkestusvektorite tabel peab asuma välkmälu alguses, sest
+sealt hakkab protsessor seda otsima. Kuna üks osa alglaadurist asub juba
+välkmälu alguses, on ka teised osad sinna järele paigutatud, mis omakorda
+tähendab, et tegelik põhiprogramm peab nüüd asuma kusagil mujal kui välkmälu
+alguses ja sellega peab arvestama põhiprogrammi linkimisel.
+
+Kui alglaadur on oma muud ülesanded juba täitnud, on tema viimaseks tööks
+põhitarkvara käivitamine. Selleks käitub sarnaselt protsessoriga, kuid
+kõigepealt on tal vaja teada, mis aadressil põhitarkvara katkestusvektorite
+tabel asub. See aadress on aga eelnevalt kokkulepitud ja sissekodeeritud.
+
+Enne põhitarkvara töölepanemist tuleks puhtaks teha pinu. Alglaaduri enda töö
+ajal sinna salvestatud väärtusi pole põhiprogrammil kohe kuidagi vaja. Pinu
+puhtaks tegemine tähendab lihtsalt pinu viida algväärtustamist, sest nii
+hakatakse edaspidi pinus juba olevaid andmeid üle kirjutama ja kui programm on
+korrektne, siis midagi sellist ei loeta, mida programm ise pole juba üle
+kirjutanud. Algväärtustamiseks kasutatakse põhitarkvara katkestusvektorite
+tabeli esimest elementi, mis näitas pinu ülemist aadressi.
+
+Kuigi mikrokontrolleri käivitamise hetkel alustatakse tööd kindlast kohast, ei
+pea terve katkestusvektorite tabel välkmälu alguses olema. Katkestustega tegeleb
+eraldi riistvara moodul NVIC (\textit{Nested Vectored Interrupt Controller}).
+Lisaks on sellega tihedalt seotud teine moodul SCB (\textit{System Control
+Block}), kus asub seadistatav register VTOR (\textit{Vector Table Offset
+Register}), mille väärtust kasutatakse katkestusvektorite tabeli aadressina.
+Vaikimisi on seal väärtus 0x0000 0000, mida kasutatakse alglaaduri laadimiseks,
+kuid alglaadur seab selleks väärtuseks põhiprogrammi katkestusvektorite tabeli
+aadressi. Kui seda ei seadistataks, siis kutsutaks põhiprogrammi katkestuse ajal välja
+alglaaduri katkestusvektoreid, mis on tegelikult implementeerimata, sest
+alglaadur ei kasuta katkestusi, ja nii ei saaks põhitarkvara oma ülesandeid
+täita. Lisaks sellele on vaikimisi katkestuse teenindamise rutiin lihtsalt
+lõputu tsükkel, seega jääks kontroller katkestusse kinni ja halvatud ei oleks
+ainult põhitarkvara katkestuse teenindamine vaid kogu põhitarkvara töö peatuks.
+
+Kui pinu viit ja katkestusvektorite tabeli asukoht on ära seadistatud jääb üle
+veel lugeda katkestusvektorite tabelist põhiprogrammi lähtestamise vektori
+aadress ja mikrokontrolleri töö sinna edasi juhtida. Selleks tehakse C-koodis
+funktsiooni viit, mis väärtustatakse lähtestamise vektori aadressiga ning
+seejärel kutsutakse see välja.
+
 
 \section{Komponendid}
 \section{Kokkuvõte}
