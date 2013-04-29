@@ -14,7 +14,7 @@
 \begin{center}
 Tartu Ülikool\\
 Matemaatika-informaatika teaduskond\\
-Arvutiteaduse intituut\\
+Arvutiteaduse instituut\\
 Informaatika eriala
 \vfill
 Karl Tarbe\\[1cm]
@@ -58,7 +58,7 @@ keskkonnas mitu korda töökindlamad kui tavapärased välkmälud (FLASH). Täps
 on mäludest juttu peatükis~\ref{sec:m2lud}.
 
 Protsessorituumaks on ARM Cortex-M3, mis paikneb STMicroelectronics-i poolt
-valmistatud mikrokontrolleris STM32F103, millest tuleb lähemalt juttu
+valmistatud mikrokontrolleris STM32F107, millest tuleb lähemalt juttu
 peatükis~\ref{sec:mcu}. Üheks märkimisväärseks omaduseks CDHSi puhul on see, et
 süsteemis on osaline riistvaraline dubleeritus: trükkplaadil on kaks identset
 mikrokontrollerit. Esialgu jookseb neist üks, kuid kui tuvastatakse, et see
@@ -77,24 +77,75 @@ täita.
 
 Sarnaselt CDHSiga juhib mooduli tööd mikrokontroller, mille tootjaks on
 STMicroelectronics. Mikrokontrolleriks on STM32F217, mis laias laastus ei erine
-eriti CDHSi peal kasutatavast STM32F103st, kuid nendest erinevustest lähemalt
+eriti CDHSi peal kasutatavast STM32F107st, kuid nendest erinevustest lähemalt
 saab lugeda peatükist~\ref{sec:mcu}.
 
 Teine sarnasus CDHSiga on see, et ka CAMil on mikrokontrollerist väljajäävad
 mälud. Täpsemalt on alglaaduri jaoks oluline, et CAMil asub FRAM tüüpi mälu,
 millega mikrokontroller saab suhelda üle \iic andmesiini.
 
-\subsection{Mikrokontrollerid STM32F103 ja STM32F217}
-\label{sec:mcu}
-
 \subsection{Mälud}
 \label{sec:m2lud}
 SRAM
 FRAM vs FLASH
 
+\subsection{Mikrokontrollerid STM32F107 ja STM32F217}
+\label{sec:mcu}
+Mikrokontrollerid STM32F107 ja STM32F217 on mõlemad STMicroelectronics-i tooted,
+mida kasutatakse vastavalt CDHSil ja CAMil. Üldiselt kogu järgnev tekst siin
+alapeatükis viitab mikrokontrollerite tehnilistele manuaalidele
+\cite{f1rm,f2rm}. Esimene alamosa kirjeldab kontrollerite ühisosa ja teine
+kirjeldab nende erinevusi. Alglaaduri tööks mittevajalikud osad jäävad
+kirjeldamata.
+\subsubsection{Sarnasused}
+Neis mõlemas on protsessorituumaks ARM arhitektuuriga Cortex-M3, mis on väga
+tihedalt seotud katkestustekontrolleriga. Täpsemalt selle kohta saab lugeda
+manuaalist \cite{CM3pm}.
+
+Mikrokontroller erineb mikroprotsessorist just selle poolest, et lisaks
+mikroprotsessorile on mikrokontrolleris olemas ka ülejäänud vajalik, et tööd
+teha: operatiivmälu, mälu tarkvara masinkoodi jaoks ja mitmed moodulid välise
+maailmaga või väliste seadmetega suhtlemiseks. Mõned moodulid, mida alglaadur
+oma töös kasutab aga on õnneks kasutamise seisukohalt täpselt samasugused.
+
+Üheks selliseks mooduliks on kontrollsumma arvutamise üksus (\textit{CRC
+calculation unit}), mille abil saab efektiivselt arvutada 32 bitist
+kontrollsummat(CRC-32). On mitmeid erinevaid standardeid, mille järgi CRC-32te
+arvutada. Antud moodul kasutab Ethernet-is ja mujal kasutusel olevat polünoomi,
+mille väärtus kuueteistkümnendsüsteemis on 0x4C11DB7. 
+
+Kuna alglaadur peab suhtlema väliste mäludega üle \iic ja SPI andmesiinide on
+oluline ka see, et mõlema jaoks on eraldi moodulid olemas. Ilma eraldiasuva
+moodulita peaks raiskama protsessoriaega, et ükshaaval erinevaid sisend-väljund
+viike juhtida, mis on küll võimalik, kuid ebaefektiivne, sest protsessor peab
+ühe andmevahetuse kella takti jooksul täitma mitmeid instruktsioone ja seega
+on andmevahetuse üldine kellasagedus kümneid kuni sadu kordi aeglasem, kui
+protsessori kellasagedus.
+
+Ja lõpetuseks võib öelda, et alglaadimise protseduur on mõlemal kontrolleril
+samasugune ja see on kirjeldatud peatükis~\ref{sec:boot}.
+
+\subsubsection{Erinevused}
+Esimeseks alglaaduri seisukohalt väheoluliseks erinevuseks on see, et
+maksimaalne lubatud töösagedus protsessorile on STM32F107 korral 72MHz ning
+STM32F217 korral 120MHz. Alglaaduri seisukohalt pole see oluline, sest alglaadur
+kasutab kogu oma töö vältel madala sagedusega sisemist kellasignaali.
+
+Alglaaduri seisukohalt oluliseks erinevuseks on aga sisemise välkmälu erinev
+ülesehitus. STM32F107l on välkmälu jagatud kaheks mälupangaks (\textit{memory
+bank}), millele on juurdepääsuks erinevad registrid, aga STM32F217l on üks
+mälupank. Lisaks sellele on esimese kontrolleri puhul kõik mälulehed sama
+suurusega, kuid ühe mälupangaga kontrolleris on mälulehtede suurused
+varieeruvad. \cite{f1fpm,f2fpm}
+
+Lisaks sellele on erinev sisend-väljund viikude seadistamine. Erinev on nii
+lihtsalt viikude seadistamine kui ka mingite konkreetsete viikude seadistamine
+nii, et riistvaralised moodulid saaksid neid kasutada.
+
 \section{Süsteemi nõuded}
 
 \section{Alglaadimine}
+\label{sec:boot}
 \subsection{Tavapärane alglaadimisprotseduur}
 Kui mikrokontrolleril toide olemas on üritab see ennast tööle panna.
 Esmalt lülitatakse sisse sisemine 8-MHz-ne ossillaator, mille signaali
