@@ -6,8 +6,10 @@
 \title{Alglaadur ESTCube-1 käsu- ja andmehaldussüsteemile ja kaameramoodulile}
 \author{Karl Tarbe}
 
-\begin{document}
 
+\newcommand{\iic}{I\({}^2\)C }
+
+\begin{document}
 \begin{titlepage}
 \begin{center}
 Tartu Ülikool\\
@@ -27,16 +29,71 @@ Bakalaureusetöö (6 EAP)
 Tartu 2013
 \end{center}
 \end{titlepage}
-
 \tableofcontents
 
 \section{Sissejuhatus}
-2todo todo todo todo todtodo todo todo o todo todo todo todo todo todo todo todo todo todo
-2todo 2todotodo todo todo todo todo todo todo
-t!!!odo t2todo todo todo todo todo todo todo todo todo todo todo todo todo todo
-2todotodo tod 
+Aasta 2008 suvel alustati tudengisatelliidi projektiga. Esialgu pidi tegemist
+olema väga lihtsa satelliidiga, kus peal on võib-olla üks või kaks
+mikrokontrollerit, kuid asjad nii ei läinud. Inseneridele meeldib ikka üle
+töötada ja asju paremaks teha. Nii sai ka eesti esimesest satelliidist päris
+keeruline süsteem, mis koosneb mitmetest moodulitest. Kuna tegemist on üpris
+keerulise süsteemiga peab ka selle juhtimiseks kasutatav tarkvara keeruline
+olema ja iga keerulise tarkvara puhul esineb tavaliselt vigu. Siinkohal muutubki
+aktuaalseks alglaadur, mille abil saab tarkvara uuendada.
+
+\subsection{Estcube-1}
+\subsubsection{Missioon}
+\subsection{Käsu- ja andmehaldussüsteem - CDHS}
+\textit{Command and Data Handling System} ehk käsu- ja andmehaldussüsteem on
+kavandatud satelliidi peamiseks pardaarvutiks. Peamised arvutused, mis määravad
+satelliidi positsiooni, toimuvad just CDHSis. CDHSi salvestatakse igasugu
+erinevaid andmeid, mida sõltuvalt maapealt tulevatele käskudele ka tagastatakse.
+
+Süsteem koosneb nii tarkvarast kui ka elektroonikast, mille peal tarkvara
+jooksutatakse. Antud bakalauresetöö raames pole põhitarkvara detailid eriti
+olulised, aga elektroonika on natuke oluline. Nimelt kuuluvad CDHSi juurde ka
+mitmed mälud, kus hoitakse erinevaid andmeid. Nendest mäludest oluliseks on
+Ferroelektrilised juhupöördusega mälud (FRAM), sest need on radiatsioonirikkas
+keskkonnas mitu korda töökindlamad kui tavapärased välkmälud (FLASH). Täpsemalt
+on mäludest juttu peatükis~\ref{sec:m2lud}.
+
+Protsessorituumaks on ARM Cortex-M3, mis paikneb STMicroelectronics-i poolt
+valmistatud mikrokontrolleris STM32F103, millest tuleb lähemalt juttu
+peatükis~\ref{sec:mcu}. Üheks märkimisväärseks omaduseks CDHSi puhul on see, et
+süsteemis on osaline riistvaraline dubleeritus: trükkplaadil on kaks identset
+mikrokontrollerit. Esialgu jookseb neist üks, kuid kui tuvastatakse, et see
+mikrokontroller enam ei tööta, lülitatakse ümber teisele mikrokontrollerile.
+Selle vea tuvastamise ja ümberlülitamise eest vastutab toitesüsteem. Lülitatakse
+ümber ka andmesiinid, sest mikrokontrollerist väljajäävad seadmed on korraga
+ühenduses ainult ühe mikrokontrolleriga.
+
+\subsection{Kaameramoodul - CAM}
+Kaameramooduli ülesandeks on teha pilte kontrollimaks, kas päikesepurje
+veljakerimine õnnestub nii nagu soovitud. Sekundaarne ülesanne on teha maast ja
+ka eestist pilte, mida saaks kasutada teaduse populariseerimise eesmärgil.
+Pilte saab teha VGA resolutsioonis ehk 640\(\times\)480 pikslit, mida on üldises
+mõttes küll väga vähe, kuid loodetavasti piisavalt, et etteantud ülesandeid
+täita.
+
+Sarnaselt CDHSiga juhib mooduli tööd mikrokontroller, mille tootjaks on
+STMicroelectronics. Mikrokontrolleriks on STM32F217, mis laias laastus ei erine
+eriti CDHSi peal kasutatavast STM32F103st, kuid nendest erinevustest lähemalt
+saab lugeda peatükist~\ref{sec:mcu}.
+
+Teine sarnasus CDHSiga on see, et ka CAMil on mikrokontrollerist väljajäävad
+mälud. Täpsemalt on alglaaduri jaoks oluline, et CAMil asub FRAM tüüpi mälu,
+millega mikrokontroller saab suhelda üle \iic andmesiini.
+
+\subsection{Mikrokontrollerid STM32F103 ja STM32F217}
+\label{sec:mcu}
+
+\subsection{Mälud}
+\label{sec:m2lud}
+SRAM
+FRAM vs FLASH
 
 \section{Süsteemi nõuded}
+
 \section{Alglaadimine}
 \subsection{Tavapärane alglaadimisprotseduur}
 Kui mikrokontrolleril toide olemas on üritab see ennast tööle panna.
@@ -100,14 +157,15 @@ eraldi riistvara moodul NVIC (\textit{Nested Vectored Interrupt Controller}).
 Lisaks on sellega tihedalt seotud teine moodul SCB (\textit{System Control
 Block}), kus asub seadistatav register VTOR (\textit{Vector Table Offset
 Register}), mille väärtust kasutatakse katkestusvektorite tabeli aadressina.
-Vaikimisi on seal väärtus 0x0000 0000, mida kasutatakse alglaaduri laadimiseks,
-kuid alglaadur seab selleks väärtuseks põhiprogrammi katkestusvektorite tabeli
-aadressi. Kui seda ei seadistataks, siis kutsutaks põhiprogrammi katkestuse ajal välja
-alglaaduri katkestusvektoreid, mis on tegelikult implementeerimata, sest
-alglaadur ei kasuta katkestusi, ja nii ei saaks põhitarkvara oma ülesandeid
-täita. Lisaks sellele on vaikimisi katkestuse teenindamise rutiin lihtsalt
-lõputu tsükkel, seega jääks kontroller katkestusse kinni ja halvatud ei oleks
-ainult põhitarkvara katkestuse teenindamine vaid kogu põhitarkvara töö peatuks.
+\cite[ptk~4.4]{CM3pm} Vaikimisi on seal väärtus 0x0000 0000, mida kasutatakse alglaaduri
+laadimiseks, kuid alglaadur seab selleks väärtuseks põhiprogrammi
+katkestusvektorite tabeli aadressi. Kui seda ei seadistataks, siis kutsutaks
+põhiprogrammi katkestuse ajal välja alglaaduri katkestusvektoreid, mis on
+tegelikult implementeerimata, sest alglaadur ei kasuta katkestusi, ja nii ei
+saaks põhitarkvara oma ülesandeid täita. Lisaks sellele on vaikimisi katkestuse
+teenindamise rutiin lihtsalt lõputu tsükkel, seega jääks kontroller katkestusse
+kinni ja halvatud ei oleks ainult põhitarkvara katkestuse teenindamine vaid kogu
+põhitarkvara töö peatuks.
 
 Kui pinu viit ja katkestusvektorite tabeli asukoht on ära seadistatud jääb üle
 veel lugeda katkestusvektorite tabelist põhiprogrammi lähtestamise vektori
@@ -115,9 +173,17 @@ aadress ja mikrokontrolleri töö sinna edasi juhtida. Selleks tehakse C-koodis
 funktsiooni viit, mis väärtustatakse lähtestamise vektori aadressiga ning
 seejärel kutsutakse see välja.
 
+Edasine toimub sarnane tegevus nagu tavapärase alglaadimise juures, kus
+lähtestamise vektoril olev kood kopeerib välkmälus oleva põhiprogrammi andmete
+sekstsiooni SRAMi, tähendab SRAMi initsialiseerimata andmete jaoks ja seejärel
+kutsub välja põhitarkvara \textit{main} protseduuri.
+
 
 \section{Komponendid}
+
 \section{Kokkuvõte}
+
+\section{Resume}
 
 \bibliographystyle{plain}
 \bibliography{viited}
