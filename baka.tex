@@ -159,7 +159,9 @@ lihtsalt viikude seadistamine kui ka mingite konkreetsete viikude seadistamine
 nii, et riistvaralised moodulid saaksid neid kasutada.
 
 \section{Süsteemi nõuded}
-
+todo: nõuete kirjeldused koos põhjendustega.
+\subsection{Muutused töö käigus}
+todo: millised nõuded muutusid ja miks.
 
 \section{Alglaadimine}
 \label{sec:boot}
@@ -248,10 +250,63 @@ kutsub välja põhitarkvara \textit{main} protseduuri.
 
 
 \section{Komponendid}
+todo: kirjeldan milline on projekti arhitektuur.
+
+\section{Töö käik}
+Esimesed läbirääkimised projekti osas toimusid oktoobris, kuid praktiline pool
+sai hoo sisse alles novembris. Esimese asjana nagu manussüsteemide
+programmeerimisel ikka, sai tehtud programm, mis vilgutab indikaatortulukest.
+Kui mikrokontrolleril juba tulukesed vilkuma said, oli järgmiseks alglaaduri
+põhifunktsionaalsus - teise programmi alglaadimine. todo: jätkata seda kirjeldust
+natuke.
+
+\subsection{Suurimad probleemid}
+\subsubsection{Viga päises}
+Mikrokontrolleri riitvaraga suhtlemine käib läbi kontroll- ja staatusregistrite,
+mis asuvad lihtsalt kusagil programmi aadressiruumis. Lihtsustamaks nendega
+suhtlemist teevad mikrokontrolleri tootjad tavaliselt C päisfailid, kus on iga
+mooduli jaoks defineeritud tema registrite aadressid. Nii ei pea igaüks eraldi
+oma koodis neid aadresse meelde jätma, vaid kasutab olemasolevaid päisfaile. See
+muudab ka kirjutatava koodi loetavamaks.
+
+Töö autor kopeeris alglaaduri jaoks need registrite nimesid ja aadresse siduvad
+päisfailid ühest STMicroelectronicsi näidisprojektist. Testides ja
+implementeerides \iic suhtlust CAMi prototüübil, tekkis probleem, et asi
+lihtsalt ei töödanud. Pärast mitmeid tunde vea otsimist leiti, et
+sisend-väljund viigud ei ole õigesti seadistatud, et \iic moodul saaks neid
+kasutada. Kui kõik teised veakohad olid välistatud, avastati vea tegelik põhjus.
+Nimelt oli viga tootja poolt tehtud päises. Viikude seadmistamisega
+riistvaramoodulile seotud registrile vahetult eelneva registri suurus oli päises
+32 bitti, kuid manuaalis oli kirjas, et see on 16bitine register. See tähendas,
+et vajalikust registrist kirjutati 16 biti võrra mööda. 
+\subsubsection{\textit{Chip Write Enable}}
+Kui \iic suhtlus CAMi prototüübil toimima saadi ja suhtlus FRAMiga toimus, siis
+asuti seda sama tegema ka CDHSi plaadil. Riistvaraline \iic moodul ise oli küll
+samasugune, aga sisend-väljund viikude seadistamine oli natuke erinev. Tundus
+nagu asi töötaks, aga FRAMi kirjutamine ei töödanud.
+
+Tagantjärele oli vea põhjus suhteliselt ilmne, kuid sellegipoolest kulus palju
+aega enne, kui veale jällile jõuti. Nimelt oli kasutataval FRAMi kiibil eraldi
+jalg, mis pidi olemas kindlas asendis, et FRAMi kirjutamine töötaks. CAMi
+plaadil oli see jalg jäädavalt õigesse asendis, aga CDHSi peal oli see viik
+ühendatud mikrokontrolleri viigu külge ja nii pidi tarkvara selle viigu enne
+kirjutamist FRAMi õigesse asendisse panema.
+
+\subsubsection{\textit{SPI slave select}}
+Kui selgus, et siiski on vaja CDHSi peal kasutada SPI siinil olevat FRAMi,
+esines ka selle implementeerimisel üks rohkem silumiseks aega võtnud probleem.
+Kuna töö autorile öeldi ainult alglaaduri tööks vajaminevate asjade kohta, siis
+jäi SPI siinil olevate teiste seadmete \textit{slave select} viigud
+seadistamata. Ossilosgraafiga SPI suhtlust vaadates leiti, et tagasitulevad
+andmed on küll väga imelikud, kuid neis on mingi loogiline struktuur. Tuli
+välja, et SPI siinil olev reaalajakell üritas samal ajal koos FRAMiga andmeid
+tagastada. Probleemi lahendus oli jällegi lihtne: määrati kõigi SPI siinil
+olevate seadmete valimise viigud mitteaktiivseks. Ja alglaaduri töö ajal muudeti
+ainult FRAMiga suhtlemise ajaks FRAMile vastavat seadme valimise viigu väljundit.
 
 \section{Kokkuvõte}
 
-\section{Resume}
+\section{Summary}
 
 \bibliographystyle{plain}
 \bibliography{viited}
