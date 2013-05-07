@@ -2,6 +2,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage[estonian]{babel}
 \usepackage{cite}
+\usepackage[hidelinks]{hyperref}
 
 \title{Alglaadur ESTCube-1 käsu- ja andmehaldussüsteemile ja kaameramoodulile}
 \author{Karl Tarbe}
@@ -74,7 +75,7 @@ keskkonnas mitu korda töökindlamad kui tavapärased välkmälud (FLASH). Täps
 on mäludest juttu peatükis~\ref{sec:m2lud}.
 
 Protsessorituumaks on ARM Cortex-M3, mis paikneb STMicroelectronics-i poolt
-valmistatud mikrokontrolleris STM32F107, millest tuleb lähemalt juttu
+valmistatud mikrokontrolleris STM32F103, millest tuleb lähemalt juttu
 peatükis~\ref{sec:mcu}. Üheks märkimisväärseks omaduseks CDHSi puhul on see, et
 süsteemis on osaline riistvaraline dubleeritus: trükkplaadil on kaks identset
 mikrokontrollerit. Esialgu jookseb neist üks, kuid kui tuvastatakse, et see
@@ -93,7 +94,7 @@ täita.
 
 Sarnaselt CDHSiga juhib mooduli tööd mikrokontroller, mille tootjaks on
 STMicroelectronics. Mikrokontrolleriks on STM32F217, mis laias laastus ei erine
-eriti CDHSi peal kasutatavast STM32F107st, kuid nendest erinevustest lähemalt
+eriti CDHSi peal kasutatavast STM32F103st, kuid nendest erinevustest lähemalt
 saab lugeda peatükist~\ref{sec:mcu}.
 
 Teine sarnasus CDHSiga on see, et ka CAMil on mikrokontrollerist väljajäävad
@@ -102,12 +103,57 @@ millega mikrokontroller saab suhelda üle \iic andmesiini.
 
 \subsection{Mälud}
 \label{sec:m2lud}
-SRAM
-FRAM vs FLASH
+Alglaadur puutub kokku kolme tüüpi mäludega, millest ühel voolu kadumisel andmed
+kaovad ja kahel andmed säilivad.
 
-\subsection{Mikrokontrollerid STM32F107 ja STM32F217}
+\subsubsection{Juhupöördusega staatiline mälu - SRAM}
+Lühend SRAM tuleb inglise keelest \textit{Static Random Access Memory}. Tegemist
+on hävimäluga ehk seal olevad andmed kaovad, kui mälul ei ole voolu. Mälu asub
+mikrokontrolleri sees ja seda kasutab programm tavapärase operatiivmäluna.
+Kasutusel olevad mikrokontrollerid lubavad sealt ka instruktsiooni käivitada,
+aga seda funktsionaalsust alglaaduris ei kasutata.
+
+\subsubsection{Välkmälu - Flash}
+Tegemist on enimlevinud tehnoloogiaga säilmälude hulgas. Antud juhul paikneb
+seda tüüpi mälu mikrokontrolleri sees. Seal asub tarkvara, mida mikroprotsessor
+asub käivitama. Antud mikrokontrollerite puhul on mälu juhupöördusega nii
+kirjutamiseks, kui ka lugemiseks, aga kirjutamiseks peab mälu olema eelnevalt
+kustutatud ehk siis mälus peab olema eelnevalt vastava pikkusega ühtedest
+koosnev bitijada. CDHSi peal kasutatava STM32F103 mikrokontrolleril toimub
+välkmällusse kirjutamine alati 16 biti kaupa. CAMil kasutataval STM32F217l saab
+valida järgnevate pikkuste vahel: 64, 32, 16 või 8 bitti \cite{f2fpm}. See valik
+sõltub ka olemasolevast toitepingest, kuid et STM32F103 peal valikut ei ole ja
+alglaadur peab mõlema peal töötama, siis sarnasuse huvides on valitud STM32F217
+korral samuti 16 bitine pikkus.
+
+Välkmälu on jagatud mälulehtedeks, mis võivad olla kõik sama suurusega nagu
+STM32F103l või ka erineva suurusega nagu STM32F217l. Välkmälust kustutamine
+toimub antud mikrokontrollerite puhul toimub kas terve mälu või ühe mälelehe
+kaupa. Kusjuures kuigi sisuliselt on tegemist sama asjaga nimetatakse STM32F103
+puhul mälulehti mälulehtedeks (\textit{memory page}), aga STM32F217
+dokumentatsioonis on kasutusel termin mälusektor (\textit{memory sector}).
+\cite{f1fpm,f2fpm}
+
+\subsubsection{Ferroelektriline juhupöördusega mälu - FRAM}
+FRAM on nagu välkmälugi säilmälu, kuhu jäävad andmed alles ka siis, kui seadmelt
+toide ära võtta. Nii CDHSil kui ka CAMil jääb FRAM mikrokontrollerist väljapoole
+ja sellega tuleb suhelda üle SPI või \iic andmesiini.
+
+FRAMil on mitmeid eeliseid välkmälu ees:
+\begin{itemize}
+	\item lubatud ülekirjutamise tsükkleid on rohkem,
+	\item voolutarve on kordades väiksem,
+	\item kiirus on kordades parem,
+	\item mälu on juhupöördusega,
+	\item mälu on radiatsioonikindlam.
+\end{itemize}
+Kuid FRAMil on ka kaks miinust: esiteks on andmetihedus suhteliselt väike ja teiseks
+on tema hind kõrgem. Seda tüüpi mälu kasutatakse satelliidil, sest see on
+radiatsioonikindlam. \cite{fram}
+
+\subsection{Mikrokontrollerid STM32F103 ja STM32F217}
 \label{sec:mcu}
-Mikrokontrollerid STM32F107 ja STM32F217 on mõlemad STMicroelectronics-i tooted,
+Mikrokontrollerid STM32F103 ja STM32F217 on mõlemad STMicroelectronics-i tooted,
 mida kasutatakse vastavalt CDHSil ja CAMil. Üldiselt kogu järgnev tekst siin
 alapeatükis viitab mikrokontrollerite tehnilistele manuaalidele
 \cite{f1rm,f2rm}. Esimene alamosa kirjeldab kontrollerite ühisosa ja teine
@@ -143,12 +189,12 @@ samasugune ja see on kirjeldatud peatükis~\ref{sec:boot}.
 
 \subsubsection{Erinevused}
 Esimeseks alglaaduri seisukohalt väheoluliseks erinevuseks on see, et
-maksimaalne lubatud töösagedus protsessorile on STM32F107 korral 72MHz ning
+maksimaalne lubatud töösagedus protsessorile on STM32F103 korral 72MHz ning
 STM32F217 korral 120MHz. Alglaaduri seisukohalt pole see oluline, sest alglaadur
 kasutab kogu oma töö vältel madala sagedusega sisemist kellasignaali.
 
 Alglaaduri seisukohalt oluliseks erinevuseks on aga sisemise välkmälu erinev
-ülesehitus. STM32F107l on välkmälu jagatud kaheks mälupangaks (\textit{memory
+ülesehitus. STM32F103l on välkmälu jagatud kaheks mälupangaks (\textit{memory
 bank}), millele on juurdepääsuks erinevad registrid, aga STM32F217l on üks
 mälupank. Lisaks sellele on esimese kontrolleri puhul kõik mälulehed sama
 suurusega, kuid ühe mälupangaga kontrolleris on mälulehtede suurused
