@@ -283,7 +283,8 @@ et vajalikust registrist kirjutati 16 biti võrra mööda.
 Kui \iic suhtlus CAMi prototüübil toimima saadi ja suhtlus FRAMiga toimus, siis
 asuti seda sama tegema ka CDHSi plaadil. Riistvaraline \iic moodul ise oli küll
 samasugune, aga sisend-väljund viikude seadistamine oli natuke erinev. Tundus
-nagu asi töötaks, aga FRAMi kirjutamine ei töödanud.
+nagu asi töötaks, aga FRAMi kirjutades ja siis lugedes ei olnud tagasiloetavad
+andmed samad, mis sinna kirjutati.
 
 Tagantjärele oli vea põhjus suhteliselt ilmne, kuid sellegipoolest kulus palju
 aega enne, kui veale jällile jõuti. Nimelt oli kasutataval FRAMi kiibil eraldi
@@ -304,11 +305,42 @@ tagastada. Probleemi lahendus oli jällegi lihtne: määrati kõigi SPI siinil
 olevate seadmete valimise viigud mitteaktiivseks. Ja alglaaduri töö ajal muudeti
 ainult FRAMiga suhtlemise ajaks FRAMile vastavat seadme valimise viigu väljundit.
 
+\section{Summary}
 \section{Kokkuvõte}
 
-\section{Summary}
-
+\label{viited}
 \bibliographystyle{plain}
 \bibliography{viited}
+
+\pagebreak
+\textbf{Lihtlitsents lõputöö reprodutseerimiseks ja lõputöö üldsusele
+kättesaadavaks tegemiseks}\\
+
+Mina Karl Tarbe (sünnikuupäev: 20.02.1991)
+\begin{enumerate}
+	\item
+		annan Tartu Ülikoolile tasuta loa (lihtlitsentsi) enda loodud teose ``Alglaadur
+		ESTCube-1 käsu- ja andmehaldussüsteemile ja kaameramoodulile'', mille juhendaja on
+		Meelis Roos,
+		\begin{enumerate}
+			\item 
+				reprodutseerimiseks säilitamise ja üldsusele kättesaadavaks
+				tegemise eesmärgil, sealhulgas digitaalarhiivi DSpace-is
+				lisamise eesmärgil kuni autoriõiguse kehtivuse tähtaja
+				lõppemiseni;
+			\item
+				üldsusele kättesaadavaks tegemiseks Tartu Ülikooli
+				veebikeskkonna kaudu, sealhulgas digitaalarhiivi DSpace'i kaudu
+				kuni autoriõiguse kehtivuse tähtaja lõppemiseni.
+		\end{enumerate}
+	\item
+		olen teadlik, et punktis 1 nimetatud õigused jäävad alles ka autorile.
+	\item
+		kinnitan, et lihtlitsentsi andmisega ei rikuta teiste isikute
+		intellektuaalomandi ega isikuandmete kaitse seadusest tulenevaid õigusi.
+\end{enumerate}
+
+Tartus, \textbf{07.05.2013}
+
 
 \end{document}
