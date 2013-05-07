@@ -160,6 +160,141 @@ nii, et riistvaralised moodulid saaksid neid kasutada.
 
 \section{Süsteemi nõuded}
 todo: nõuete kirjeldused koos põhjendustega.
+\subsection{Kasutusjuhud}
+
+\subsubsection{Vaikimisi alglaadimine}
+\begin{enumerate}
+\item Protsessor laeb alglaaduri
+	\begin{enumerate}
+	\item Kõik lisaseadmed ja riistvaramoodulid lülitatakse välja.
+	\item Kõik viigud seatakse analoogsisendiks.
+	\item Valvekoera taimer (\textit{Watchdog Timer}) seadistatakse.
+	\item Lihtsad \iic FRAMi ajurid laetakse.
+	\item Kontrollsumma moodul seadistatakse.
+	\item Südamelöögi signaal seadistatakse.
+	\item Alglaadur kontrollib iseenda kontrollsummat.
+	\item Alglaadur võtab esimese käsu, valideerib ja täidab selle.
+	\item CDHSi tarkvara alglaetakse.
+	\item CDHSi tarkvara loeb alglaaduri logi ja kopeerib sealt tema jaoks
+		huvitavad elemendid oma vigade logisse.
+	\end{enumerate}
+\end{enumerate}
+
+\subsubsection{CDHSi tarkvara uuendamine}
+\begin{enumerate}
+	\item Uue tarkvara pilt hoiustatakse välises FRAMis ning CDHS
+		taaskäivitatakse koos
+		\begin{enumerate}
+			\item käsuga alglaadurile, et kopeerida see mikrokontrolleri
+				sisemisse välkmälusse.
+		\end{enumerate}
+	\item Alglaadur võtab esimese käsu ja täidab selle.
+		\begin{enumerate}
+			\item Käsuks on kopeerida tarkvara pilt välimisest FRAMi pesast \(X\)
+				sisemisse välkmälu pessa \(Y\).
+				\begin{enumerate}
+					\item Arvutatakse pesas \(X\) oleva pildi kontrollsumma ja
+						võrreldakse seda pesa \(X\) päises olevaga.
+						\begin{enumerate}
+							\item Kopeeritakse tarkvara pilt pesast \(X\) pesasse \(Y\).
+							\item Kontrollitakse tarkvara pilti pesas \(Y\) ja
+								vajadusel korratakse kopeerimist kuni kolm
+								korda.
+							\item Logitakse õnnestumine.
+						\end{enumerate}
+				\end{enumerate}
+		\end{enumerate}
+\end{enumerate}
+
+\subsubsection{Välisest FRAMist lugemine ebaõnnestub}
+\begin{enumerate}
+	\item Alglaadur käivitatakse koos käsuga kopeerida tarkvara pilt välisest
+		FRAMist.
+	\item Alglaadur üritab lugeda välisest FRAMist.
+		\begin{enumerate}
+		\item Oletame, et FRAM ei vasta, või \iic andmesiin on hõivatud.
+		\end{enumerate}
+	\item \iic viga logitakse.
+	\item Käskude nimekiri tühjendatakse.
+	\item Alglaadur alglaeb vaikimisi pesas oleva tarkvara.
+\end{enumerate}
+
+\subsubsection{Kontrollsumma erinevus tarkvara pildil}
+\begin{enumerate}
+	\item Alglaaduril küsitakse opereerida tarkvara pildiga (kas kopeerida või
+		alglaadida).
+	\item Alglaadur arvutab tarkvara pildi kontrollsumma.
+	\item Alglaadur võrdleb seda tarkvara pildi päises oleva kontrollsummaga.
+		\begin{enumerate}
+			\item Oletame, et need ei ühti.
+		\end{enumerate}
+	\item Viga logitakse.
+	\item Käskude nimekiri tühjendatakse.
+	\item Alglaadur valib vaikimisi tarkvara pildi ja proovib seda alglaadida.
+\end{enumerate}
+
+\subsubsection{Käskude nimekirjas on tundmatu käsk}
+\begin{enumerate}
+	\item Alglaadur vaatab käskude nimekirja.
+		\begin{enumerate}
+			\item Ja see ei ole tühi.
+		\end{enumerate}
+	\item Alglaadur võtab esimese käsu nimekirjast.
+	\item Proovib seda verifitseerida, kuid ebaõnnestub.
+	\item Alglaadur logib vea.
+	\item Käskude nimekiri tühjendatakse.
+	\item Alglaadur valib vaikimisi tarkvara pildi ja proovib seda alglaadida.
+\end{enumerate}
+
+\subsubsection{Soovitud tarkvara pilt valitakse FIRMW viigu abil}
+\begin{enumerate}
+	\item Alglaadur vaatab käskude nimekirja.
+	\item Käskude nimekiri on tühi.
+	\item Alglaadur vaatab FIRMW viiku.
+		\begin{enumerate}
+			\item See on madal?
+				\begin{enumerate}
+					\item Jah, siis laetakse vaikimisi pesas olev tarkvara.
+				\end{enumerate}
+			\item See on kõrge?
+				\begin{enumerate}
+					\item Jah, siis laetakse tagavara pesas olev tarkvara.
+				\end{enumerate}
+		\end{enumerate}
+\end{enumerate}
+
+\subsubsection{Alglaaduril ebaõnnestub vea logimine}
+\begin{enumerate}
+	\item Midagi juhtub ja alglaaduril ebaõnnestub vea logimine.
+		\begin{enumerate}
+			\item Vigade logi on täis?
+				\begin{enumerate}
+					\item Alglaadur ei kirjuta vanemaid sissekandeid üle.
+				\end{enumerate}
+		\end{enumerate}
+	\item Alglaadur jätkab tööd ignoreeride probleemi.
+\end{enumerate}
+
+\subsubsection{Spetsiifilise tarkvara pildi alglaadimine}
+\begin{enumerate}
+	\item CDHS käivitab alglaaduri käsuga laadida tarkvara kindlast pesast.
+	\item Alglaadur verifitseerib käsu.
+	\item Logib õnnestumise.
+	\item Tühjendab käskude nimekirja.
+	\item Ja alglaeb tarkvara.
+\end{enumerate}
+
+\subsubsection{Alglaaduri kontrollsumma erinevus}
+\begin{enumerate}
+	\item Alglaadur arvutab enda kontrollsumma.
+	\item Siis proovib seda võrrelda varem kuhugi salvestatuga.
+		\begin{enumerate}
+		\item Oletame, et need ei ole võrdsed.
+		\end{enumerate}
+	\item Viga logitakse.
+	\item Alglaadur valib vaikimisi tarkvara pildi ja proovib seda alglaadida.
+\end{enumerate}
+
 \subsection{Muutused töö käigus}
 todo: millised nõuded muutusid ja miks.
 
@@ -306,7 +441,9 @@ olevate seadmete valimise viigud mitteaktiivseks. Ja alglaaduri töö ajal muude
 ainult FRAMiga suhtlemise ajaks FRAMile vastavat seadme valimise viigu väljundit.
 
 \section{Summary}
+todo: write summary
 \section{Kokkuvõte}
+todo: kirjuta kokkuvõte
 
 \label{viited}
 \bibliographystyle{plain}
