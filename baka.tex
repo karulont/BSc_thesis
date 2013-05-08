@@ -103,8 +103,7 @@ millega mikrokontroller saab suhelda üle \iic andmesiini.
 
 \subsection{Mälud}
 \label{sec:m2lud}
-Alglaadur puutub kokku kolme tüüpi mäludega, millest ühel voolu kadumisel andmed
-kaovad ja kahel andmed säilivad.
+Alglaadur puutub kokku kolme tüüpi mäludega.
 
 \subsubsection{Juhupöördusega staatiline mälu - SRAM}
 Lühend SRAM tuleb inglise keelest \textit{Static Random Access Memory}. Tegemist
@@ -130,7 +129,7 @@ Välkmälu on jagatud mälulehtedeks, mis võivad olla kõik sama suurusega nagu
 STM32F103l või ka erineva suurusega nagu STM32F217l. Välkmälust kustutamine
 toimub antud mikrokontrollerite puhul toimub kas terve mälu või ühe mälelehe
 kaupa. Kusjuures kuigi sisuliselt on tegemist sama asjaga nimetatakse STM32F103
-puhul mälulehti mälulehtedeks (\textit{memory page}), aga STM32F217
+puhul mälulehti mälulehtedeks (\textit{memofy page}), aga STM32F217
 dokumentatsioonis on kasutusel termin mälusektor (\textit{memory sector}).
 \cite{f1fpm,f2fpm}
 
@@ -141,7 +140,7 @@ ja sellega tuleb suhelda üle SPI või \iic andmesiini.
 
 FRAMil on mitmeid eeliseid välkmälu ees:
 \begin{itemize}
-	\item lubatud ülekirjutamise tsükkleid on rohkem,
+	\item lubatud ülekirjutamise tsükleid on rohkem,
 	\item voolutarve on kordades väiksem,
 	\item kiirus on kordades parem,
 	\item mälu on juhupöördusega,
@@ -431,7 +430,31 @@ kutsub välja põhitarkvara \textit{main} protseduuri.
 
 
 \section{Komponendid}
-todo: kirjeldan milline on projekti arhitektuur.
+Töö on jagatud kaheks Eclipse projektiks, millest üks on alglaadur ise ja teine on
+abiteek, mille abil saab alglaadurile käske anda, käske lugeda ja alglaaduri
+logi lugeda. Eclipse on kasutusel sellepärast, et ülejäänud satelliidi tarkvara jaoks
+kasutati Eclipse'i. 
+
+\subsection{Alglaadur}
+
+\subsection{Alglaaduri abiteek}
+Alglaaduri abiteek koosneb ühest päisefailist ja ühest C-failist, mis
+implementeerib päises olevad funktsioonid. Abiteek on tehtud selleks, et
+lihtsustada ülejäänud tarkvaral alglaaduriga suhtlemist. Kuna näiteks käskude
+nimekirja lugemine on tegevus, mida võiks saada teha välimine tarkvara käskude
+nimekirja kontrollimiseks ja alglaadur ise käskude täitmiseks, siis koodi
+duplitseerimise asemel kasutab alglaadur ise ka seda abiteeki.
+
+Abiteegis on funktsioonid käskude nimekirja lugemiseks ja muutmiseks. Kuna
+käskude nimekiri asub välimises FRAMis, millele saab ligi üle \iic siini, siis
+on abiteegil vaja funktsioone, et FRAMi lugeda ja kirjutada. Samas on teada, et
+nii alglaaduris kui ka põhitarkvaras, mis mõlemad abiteeki kasutavad, on olemas
+juba funktsioonid selle jaoks. Seega on mõistlik kasutada juba olemasolevaid
+funktsioone ka abiteegis. Levinud viis on selleks kasutada funktsiooniviitasid,
+mis kaasa antakse, kuid nendest loobuti ja defineeriti päises lihtsalt
+funktsioonide prototüübid. Kasutades funktsiooniviitasid oleks vea korral
+probleem tekkinud programmi töö käigus, aga käesoleva lahenduse korral tuleb
+viga välja juba linkimise faasis.
 
 \section{Töö käik}
 Esimesed läbirääkimised projekti osas toimusid oktoobris, kuid praktiline pool
@@ -486,6 +509,8 @@ tagastada. Probleemi lahendus oli jällegi lihtne: määrati kõigi SPI siinil
 olevate seadmete valimise viigud mitteaktiivseks. Ja alglaaduri töö ajal muudeti
 ainult FRAMiga suhtlemise ajaks FRAMile vastavat seadme valimise viigu väljundit.
 
+\section{Mida tulevikus paremini teha?}
+todo: kui aega ja jaksu, siis siia midagi kirjutada.
 \section{Summary}
 todo: write summary
 \section{Kokkuvõte}
