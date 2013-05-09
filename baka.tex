@@ -8,7 +8,7 @@
 \author{Karl Tarbe}
 
 
-\newcommand{\iic}{I\({}^2\)C }
+\newcommand{\iic}{I${}^2$C }
 
 \begin{document}
 \begin{titlepage}
@@ -346,6 +346,7 @@ todo: millised nõuded muutusid ja miks.
 \section{Alglaadimine}
 \label{sec:boot}
 \subsection{Tavapärane alglaadimisprotseduur}
+\label{sec:boot:tava}
 Kui mikrokontrolleril toide olemas on üritab see ennast tööle panna.
 Esmalt lülitatakse sisse sisemine 8-MHz-ne ossillaator, mille signaali
 neljandal tõusval frondil loetakse konfigureerimise viikude väärtused. Nende
@@ -436,6 +437,101 @@ logi lugeda. Eclipse on kasutusel sellepärast, et ülejäänud satelliidi tarkv
 kasutati Eclipse'i. 
 
 \subsection{Alglaadur}
+Alglaaduri projekt koosneb mitmetest failidest, mille hulgas on 9 C-faili, 4
+päisefaili, 2 assembleri faili ja 2 linkimise skripti. Kuna alglaadur peab töötama kahel erineval
+platvormil, siis on platvormispetsiifilised kohad koodis kaitstud eeltöötluse
+makrodega (\textit{preproccesor macros}). Eeltöötluse jaoks defineeritakse
+sümbolid vastavalt Eclipse projektis olevale ehitamise seadistusele
+(\textit{build configuration}). See tähendab, et kompilleerides alglaadurit
+näiteks CDHSi jaoks, siis need osad koodist, mis on mõeldud ainult CAMile,
+jäävad kompillaatoril nägemata, sest eeltöötluse käigus võetakse need välja.
+
+\subsubsection{Assemblery failid: \textbf{startup\_stm32fxxxx.S}}
+Failid \textbf{startup\_stm32f10x\_xl.S} ja \textbf{startup\_stm32f2xx.S} on
+tegelikult peaaegu täpselt samasugused. Neid on kaks tükki, sest alglaadur peab
+töötama kahel erineval mikrokontrolleril. Neis failides on kirjas
+katkestusvektorite tabel, mis on kasutataval mikrokontrolleritel erinev. Lisaks
+sellele on neis failides see põhiline andmete SRAMi kopeerimine, SRAMi nullide
+kirjutamine ja C-koodis oleva \textit{main}i väljakutsumine, millest oli juttu
+peatükis~\ref{sec:boot:tava}.
+
+\subsubsection{Süsteemi päised: \textbf{stm32fxxx.h}}
+Päised \textbf{stm32f10x.h} ja \textbf{stm32f2xx.h} on mikrokontrolleritele
+STM32F103 ja STM32F217 vastavad abifailid, milles on defineeritud eeltöötluse
+makrod ja struktuurid, mis teevad riistvaramoodulite registrite kasutamise
+oluliselt lihtsamaks. Need failid on üldiselt saadaval mikrokontrolleri tootja
+käest.
+
+\subsubsection{Cortex-M3 päis: \textbf{core\_cm3.h}}
+Selles päises on defineeritud protsessorituumaga seotud registritele
+juurdepääsemist abistavad makrod ja struktuurid. Lisaks selle on seal
+prototüübid funktsioonidele, mis annavad C-koodist juurdepääsu spetsiaalsetele
+instruktsioonidele, mida kompillaator omapead ei kasuta. Päisega käib koos
+implementatsioonifail \textbf{core\_cm3.c}, kus on antud siis implementatsioonid
+nendele spetsiaalsetele intruktsioonidele kasutades selleks C-faili kirjutatavat
+assemblerit. Nii päis kui ka implementatsioon on saadaval Cortex-M3
+protsessorituuma disainijalt ARM Holdings-ilt.
+
+\subsubsection{Peamine päisfail - \textbf{bootloader.h}}
+Esimese asjana kaasab see päis endaga vastavalt eeltöötluse muutujatele õige
+süsteemi päise. Kuna peaaegu kõik teised C-failid kaasavad selle faili saavad
+nad nii ka ligipääsu õigetele süsteemi päisetele, mille abil
+riistvaramoodulitega suhelda. Lisaks sellele on antud failis kogu bootloaderis
+kasutatavate funktsioonide prototüübid. Tavalised tehakse küll nii, et ühe
+tarkvaramooduli kohta on üks päisfail ja üks implementatsioonifail, aga nii
+oleks tekkinud palju lühikesi päisfaile, mis teevad koodi lugemise asjatult
+raskemaks.
+
+\subsubsection{Põhifunktsionaalsus - \textbf{bootloader.c}}
+Selle failis on implementeeritud alglaaduri põhifunktsionaalsus. Seal on
+protseduurid kindlal aadressil oleva tarkvara alglaadimiseks, tarkvara
+kopeerimise käsu ja kindlas pesas oleva tarkvara alglaadimise käsu täitmiseks.
+
+\subsubsection{Sisemise välkmäluga opereerimine - \textbf{flash.c}}
+Failis on implementeeritud välkmälu kustutamine ja programmeerimine.
+Lugemist pole vaja, sest välkmälu asub mikrokontrolleri aadressiruumis ja sealt
+lugemine tähendab lihtsalt mingilt aadressilt lugemist. Implementatsioon on
+selline, mis abstrakteerib ära mikrokontrollerite erinevused.
+
+\subsubsection{\texorpdfstring{\iic}{I2C} FRAMiga suhtlemine - \textbf{fram.c}}
+Fail implementeerib \iic suhtluse välise FRAMiga. Antud fail töötas nii CDHSil
+kui ka CAMil, kuid hiljem selgus, et CDHSi peal peab siiski kasutama SPI siinil
+olevat FRAMi. Sellest ajast on ka faili nimi lihtsalt viide mälu tüübile, kuna
+siis pidi olema kasutusel ainult \iic siinil olev FRAM.
+
+Fail on kasutusel ainult CAMil.
+
+\subsubsection{SPI FRAMiga suhtlemine - \textbf{fram\_spi.c}}
+Failis on implementeeritud samad funktsioonid FRAMiga suhtlemiseks, kuid seda
+üle SPI andmesiini. Kasutatud on paari kavalat võtet, et koodi mahtu vähendada.
+
+Fail on kasutusel ainult CDHSil.
+
+\subsubsection{Sisend/väljund viikude seadmine - \textbf{gpio.c}}
+Antud fail lubab lisaseadmetele tööks vajaliku kellasignaali, seadistab
+sisend/väljund viigud ja määrab need vajadusel riistvaramoodulitele. Samuti on
+seal funktsioonid tarkvara valimise viigu lugemiseks ja südamelöögi
+tekitamiseks. Antud failis on vastavad funktsioonid mõlemale mikrokontrollerile,
+kuid need erinevused on ära abstrakteeritud.
+
+\subsubsection{Alglaaduri logimine - \textbf{logging.c}}
+Alglaaduri logi salvestatakse ühte välkmälu lehte. Igal alglaaduri käivitamisel
+leitakse kahendotsinguga üles seal lehes koht, kuhu logi kirjutamine pooleli jäi
+ja jätkatakse sealt logi täitmist. Kui juhtub, et käivitamise hetkel on logi
+peaaegu täis, siis võetakse viimased 10 logi elementi, kopeeritakse need SRAMi,
+kustutatakse mäluleht välkmälus ära, ja siis kirjutatakse need 10 logi elementi
+logi algusesse. Samuti on hoolitsetud selle eest, et kui isegi peaks kuidagi töö
+käigus logisse rohkem kirjutatama, kui logis ruumi on, siis jäetakse ikkagi logi
+alast välkmälus väljapoole kirjutamata.
+
+\subsubsection{Alguspunkt - \textbf{main.c}}
+todo: write about it
+
+\subsubsection{Testid - \textbf{tests.c}}
+Siin failis on mõned funktsioonid, mida kasutasin testimisel, kuid alglaaduris
+neid tegelikult vaja ei ole. Siin on kood FRAMist kirjutamise, lugemise
+testimiseks. Logisse kirjutamiseks, ja kood käskude nimekirja testkäskude
+panemiseks.
 
 \subsection{Alglaaduri abiteek}
 Alglaaduri abiteek koosneb ühest päisefailist ja ühest C-failist, mis
@@ -454,7 +550,8 @@ funktsioone ka abiteegis. Levinud viis on selleks kasutada funktsiooniviitasid,
 mis kaasa antakse, kuid nendest loobuti ja defineeriti päises lihtsalt
 funktsioonide prototüübid. Kasutades funktsiooniviitasid oleks vea korral
 probleem tekkinud programmi töö käigus, aga käesoleva lahenduse korral tuleb
-viga välja juba linkimise faasis.
+viga välja juba linkimise faasis: kui prototüüpidele vastavate funktsioonide
+implementatsiooni ei leita, siis annab linkija veateate.
 
 \section{Töö käik}
 Esimesed läbirääkimised projekti osas toimusid oktoobris, kuid praktiline pool
