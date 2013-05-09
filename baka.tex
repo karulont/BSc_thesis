@@ -81,8 +81,15 @@ süsteemis on osaline riistvaraline dubleeritus: trükkplaadil on kaks identset
 mikrokontrollerit. Esialgu jookseb neist üks, kuid kui tuvastatakse, et see
 mikrokontroller enam ei tööta, lülitatakse ümber teisele mikrokontrollerile.
 Selle vea tuvastamise ja ümberlülitamise eest vastutab toitesüsteem. Lülitatakse
-ümber ka andmesiinid, sest mikrokontrollerist väljajäävad seadmed on korraga
+ümber ka andmesiinid, et mikrokontrollerist väljajäävad seadmed oleksid korraga
 ühenduses ainult ühe mikrokontrolleriga.
+
+Toitesüsteemis on implementeeritud ka niiöelda väline valvekoer. Kui CDHSi
+mikrokontroller aegajalt ühte viiku ei vilguta, siis toitesüsteem tõlgendab seda
+sellena, et CDHS on määramata olekus, ja taaskäivitab CDHSi temalt ajutiselt
+toite ära võtmise abil. Seda signaali, mida CDHS genereerima peab nimetatakse
+südamelöögi signaaliks, sest nagu inimese puhulgi, kui seda signaali pole, siis
+süsteem või inimene on surnud.
 
 \subsection{Kaameramoodul - CAM}
 Kaameramooduli ülesandeks on teha pilte kontrollimaks, kas päikesepurje
@@ -100,6 +107,9 @@ saab lugeda peatükist~\ref{sec:mcu}.
 Teine sarnasus CDHSiga on see, et ka CAMil on mikrokontrollerist väljajäävad
 mälud. Täpsemalt on alglaaduri jaoks oluline, et CAMil asub FRAM tüüpi mälu,
 millega mikrokontroller saab suhelda üle \iic andmesiini.
+
+Ka CAMi jaoks on toitesüsteemis eraldi signaal, kuhu CAM peab südamelööke
+genereerima täpselt samamoodi, nagu seda teeb CDHS.
 
 \subsection{Mälud}
 \label{sec:m2lud}
@@ -206,7 +216,7 @@ nii, et riistvaralised moodulid saaksid neid kasutada.
 \section{Süsteemi nõuded}
 Käesolevas peatükis on väljatoodud alglaadurile alguses paikapandud nõuded ja
 kasutusjuhud. Nende kirjapanemisega tegeles peamiselt Indrek Sünter, kes arendab
-tarkvara CDHSile.
+tarkvara CDHSile. 
 \subsection{Alglaaduri käsud}
 \subsubsection{Käsk kindla tarkvara alglaadimiseks}
 Vajalik, et vahetada kasutatavat tarkvara. Käsu abil saab valida millises pesas
@@ -269,9 +279,10 @@ Selleks muudab toitesüsteem CDHS\_FIRM viigu väärtust.
 Alglaadur peab töötama nii STM32F103l, mis on CDHSil, kui ka
 STM32F217l, mis on CAMil.
 
-\subsection{Kasutusjuhud}
-Siin on esitatud esialgsed kasutusjuhud, mis on töö autorile ette anti.
-\subsubsection{Vaikimisi alglaadimine}
+\subsection{Kasutuslood}
+Siin on esitatud esialgsed kasutuslood, mis on töö autorile ette anti.
+\subsubsection{Tavapärane alglaadimine}
+\label{sec:usecase:default}
 \begin{enumerate}
 \item Protsessor laeb alglaaduri
 	\begin{enumerate}
@@ -290,6 +301,7 @@ Siin on esitatud esialgsed kasutusjuhud, mis on töö autorile ette anti.
 \end{enumerate}
 
 \subsubsection{CDHSi tarkvara uuendamine}
+\label{sec:usecase:upgrade}
 \begin{enumerate}
 	\item Uue tarkvara pilt hoiustatakse välises FRAMis ning CDHS
 		taaskäivitatakse koos
@@ -316,6 +328,7 @@ Siin on esitatud esialgsed kasutusjuhud, mis on töö autorile ette anti.
 \end{enumerate}
 
 \subsubsection{Välisest FRAMist lugemine ebaõnnestub}
+\label{sec:usecase:framerror}
 \begin{enumerate}
 	\item Alglaadur käivitatakse koos käsuga kopeerida tarkvara pilt välisest
 		FRAMist.
@@ -356,6 +369,7 @@ Siin on esitatud esialgsed kasutusjuhud, mis on töö autorile ette anti.
 \end{enumerate}
 
 \subsubsection{Soovitud tarkvara pilt valitakse FIRMW viigu abil}
+\label{sec:usecase:fwselect}
 \begin{enumerate}
 	\item Alglaadur vaatab käskude nimekirja.
 	\item Käskude nimekiri on tühi.
@@ -381,7 +395,7 @@ Siin on esitatud esialgsed kasutusjuhud, mis on töö autorile ette anti.
 					\item Alglaadur ei kirjuta vanemaid sissekandeid üle.
 				\end{enumerate}
 		\end{enumerate}
-	\item Alglaadur jätkab tööd ignoreeride probleemi.
+	\item Alglaadur jätkab tööd ignoreerides probleemi.
 \end{enumerate}
 
 \subsubsection{Spetsiifilise tarkvara pildi alglaadimine}
@@ -405,7 +419,61 @@ Siin on esitatud esialgsed kasutusjuhud, mis on töö autorile ette anti.
 \end{enumerate}
 
 \subsection{Muutused töö käigus}
-todo: millised nõuded muutusid ja miks.
+Nagu peaaegu igale tarkvaraprojektile kohaselt, muutusid ka selle projekti
+käigus nõuded. Aga seda peamiselt seetõttu, et esialgsete nõuete koostamisel ei
+oldud teadlikult väga põhjalik ja esialgsed nõuded jätsid päris mitmed
+detailid lahtiseks. Samuti on vasturääkivusi esitatud kasutuslugudes.
+
+Kokkuvõtvalt sündisid konkreetsed tehnilised lahendused ikkagi töö käigus. Antud
+nõuded ja kasutuslood olid küll suuna näitajateks, kuid neid ei võetud rangete
+reeglitena, sest nende tegelik eesmärk oli lihtsalt midagi kirja panna, et
+hakkaks moodustuma tervikpilt.
+
+\subsubsection{Töö käigus tekkinud täpsustused}
+Käskude nimekirja hoidmiseks valiti väline FRAM, sest see tundus kõige
+turvalisem, sest ta on radiatsioonikindlam kui välkmälu ja kui peaks juhtuma, et
+välise FRAMiga ei saa suhelda, siis nagunii pole alglaaduril võimalik tarkvara
+kopeerida ning tarkvarapildi valimiseks saab kasutada ka toitesüsteemi, mis
+muudab FIRMW viigule mineva signaali väärtust.
+
+Samuti otsutati, et ka kopeerimine toimub just FRAMist sisemisse välkmälusse,
+sest nii on alglaaduri keerukus väiksem, sest pole vaja eraldi suhtlust välise
+välkmäluge, mis oli alternatiivne koht tarkvara piltide hoiustamiseks. 
+
+Algselt leiti ka veel seda, et nii CAMil kui ka CDHSil on \iic siinil olev FRAM.
+See tähendas, et oli vaja implementeerida ainult \iic suhtlus. Hiljem aga tehti
+avastus, et CDHSil \iic andmesiinil olev FRAM on liiga väike, et seal tarkvara
+pilte hoida. Seetõttu tuli implementeerida ka SPI siinil suhtlus FRAMiga, sest
+CDHSi peal oli SPI siinil piisava suurusega FRAM. Teisest küljest CAMil ei ole
+SPI siinil asuvat FRAMi ja seega CAMil kasutatakse \iic siinil olevat FRAMi.
+
+\subsubsection{Kasutuslugude muutused}
+Kasutusloos~``\ref{sec:usecase:default}~\nameref{sec:usecase:default}'' pole vaja
+teha kahte esimest tegevust, sest pärast mikrokontrolleri resetti on niigi kõik
+lisaseadmed väljalülitatud ja enamik sisend/väljund viikudest on seadistatud
+analoogsisendiks\cite{f1rm,f2rm}. Lisaks sellele leiti töö käigus, et sisemist
+valvekoera taimerit ei peaks kasutatama, sest kui CDHSi tarkvara kokku jookseb,
+teeb valvekoer mikrokontrollerile taaskäivituse, siis jookseb tarkvara uuesti
+kokku ja asi jääb tsüklisse. Kui nüüd selle tsükli käigus ka südamelöögi
+signaali genereeritakse, siis ei saaks toitesüsteem probleemist teada ja ei
+oskaks ümber lülitada teisele tarkvara pesale või CDHSi puhul teisele
+mikrokontrollerile. Samuti on ka neljas punkt natuke vale, sest CDHSil saab
+FRAMile ligi \iic asemel üle SPI andmesiini.
+
+Kasutusloos~``\ref{sec:usecase:upgrade}~\nameref{sec:usecase:upgrade}'' ei ole vaja
+Välimises FRAMis kindlat pesa määrata, vaid selle asemel kasutatakse otseselt
+mäluaadressi, millelt tarkvara pilt leitakse. 
+
+Kasutuslugu~``\ref{sec:usecase:framerror}~\nameref{sec:usecase:framerror}''
+tuleb ka muuta, sest FRAM ei pruugi alati olla \iic siinil ning enne
+kopeerimise käsku tuleb FRAMist lugeda käskude nimekiri. Samuti käskude
+nimekirja kustutamiseks on vaja FRAMi kirjutada.
+
+Kasutusloo~``\ref{sec:usecase:fwselect}~\nameref{sec:usecase:fwselect}'' puhul
+tehtud muudatus on selline, et käskude nimekiri ei pea olema tühi. Lihtsalt iga
+kord, kui on juttu vaikimisi pesas oleva tarkvara alglaadimisest, siis valitakse
+pesa vastavalt selle viigu väärtusele. Ja koodis on tagavara pesa asemel leebem
+nimetus: sekundaarne pesa.
 
 \section{Alglaadimine}
 \label{sec:boot}
@@ -438,7 +506,7 @@ koodis kirjutatud \textit{main} protseduurile. Satelliidi peal ei kasutata
 üldist kella seadmise koodi ja seega see samm jäetakse vahele ning kella
 seadmine kutsutakse välja \textit{main}ist.
 
-See, mida tarkvara edasi initisaliseerib, on juba tarkvara spetsiifiline.
+See, mida tarkvara edasi initsialiseerib, on juba tarkvara spetsiifiline.
 Tõenäoliselt initsialiseeritakse mõned riistvaralised moodulid näiteks USART või
 SPI ja hakatakse siis rakendusele vajalikku kontrolltsüklit täitma. Satelliidil
 Estcube-1 kasutatakse nii CAMil kui ka CDHSil reaalaja operatsioonisüsteemi
@@ -694,8 +762,8 @@ Tema tegeles CDHSi põhitarkvara kirjutamisega ja seega oli tema põhiline
 paika panna, samuti luges mulle skeemidelt ette vajalikud sisend/väljund viigud
 ning aitas prototüüpide ühendamisel. Suured tänud talle!
 
-Lisaks saab tänu osaliseks minu hea sõber Mihkel Heidelberg, kes mulle seda
-teemat soovitas.
+Lisaks saab tänu osaliseks minu hea sõber Mihkel Heidelberg, kes mulle selle
+teema soovitas.
 
 \label{viited}
 \bibliographystyle{plain}
