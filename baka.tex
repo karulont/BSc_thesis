@@ -23,13 +23,13 @@ Alglaadur ESTCube-1 käsu- ja andmehaldussüsteemile ja kaameramoodulile\\[4mm]
 Bakalaureusetöö (6 EAP)
 \vspace{2cm}
 \begin{flushright}
-	Juhendajad: Meelis Roos\\
-	Helle Hein
+	Juhendaja: Meelis Roos
 \end{flushright}
 \vfill
 Tartu 2013
 \end{center}
 \end{titlepage}
+\setcounter{page}{2}
 \tableofcontents
 
 \section{Sissejuhatus}
@@ -204,9 +204,73 @@ lihtsalt viikude seadistamine kui ka mingite konkreetsete viikude seadistamine
 nii, et riistvaralised moodulid saaksid neid kasutada.
 
 \section{Süsteemi nõuded}
-todo: nõuete kirjeldused koos põhjendustega.
-\subsection{Kasutusjuhud}
+Käesolevas peatükis on väljatoodud alglaadurile alguses paikapandud nõuded ja
+kasutusjuhud. Nende kirjapanemisega tegeles peamiselt Indrek Sünter, kes arendab
+tarkvara CDHSile.
+\subsection{Alglaaduri käsud}
+\subsubsection{Käsk kindla tarkvara alglaadimiseks}
+Vajalik, et vahetada kasutatavat tarkvara. Käsu abil saab valida millises pesas
+olev tarkvara alglaetakse.
 
+\subsubsection{Käsk tarkvara kopeerimiseks}
+Vajalik, et saaks teostada tarkvara uuendamist, kui CDHS töötab. Käsu eesmärk on
+kopeerida tarkvara ühest mäluseadmest teise. Enne kopeerimist tuleb
+valideerida tarkvara pildi terviklikkus.
+
+\subsection{Alglaaduri käskude nimekiri}
+\subsubsection{Käskude lisamine nimekirja}
+Vajalik tarkvara uuendamiseks, kui CDHS töötab. Eeldab, et CDHSi põhitarkvara
+töötab.
+
+\subsubsection{Vigade logimine}
+Vajalik, et vigadest teada saada. Kui mõne alglaaduri käsu täitmine ebaõnnestub
+tuleb see logida.
+
+\subsubsection{Vaikimisi alglaadimine}
+Enamasti on alglaaduri käskude nimekiri tühi ja selleks ajaks oleks vaja head
+ohutut vaikimisi käitumist, mis alglaeks olemasoleva tarkvara.
+
+\subsubsection{Õnnestumise logimine}
+Kui midagi alglaaduri töös halvasti läheb, siis on vaja teada, mida alglaadur
+edukalt juba ära tegi.
+
+\subsubsection{Käskude nimekirja valideerimine}
+Radiatsiooni või mingi muu nähtuse tõttu võib käskude nimekiri kahjustada saada.
+Vigaste käskude täitmise vältimiseks tuleb käskude nimekirja terviklikkus üle
+kontrollida.
+
+\subsection{Alglaaduri töö}
+\subsubsection{Välisest mälust lugemine}
+Sisemises välkmälus pole piisavalt ruumi, et hoida piisavat arvu tagavara
+tarkvara pilte. Seega peab alglaadur suutma väliste mäluseadmetega suhelda.
+
+\subsubsection{Sisemisse välkmällu kirjutamine}
+Mikrokontroller suudab koodi jooksutada ainult sisemisest välkmälust või
+SRAMist, seega peab alglaadur suutma paigutada tarkvara sinna, kus seda saab
+käivitada.
+
+\subsubsection{Tarkvara kontrollsumma kontrollimine kopeerimisel}
+Tarkvara võib välises mälus kahjustada saada, seega tuleb enne kopeerimist
+kontrollida, kas kontrollsumma klapib, et tagada tarkvara pildi terviklikkus.
+
+\subsubsection{Tarkvara kontrollsumma kontrollimine alglaadimisel}
+Tarkvara võib sisemises välkmälus kahjustada saada ja vigast tarkvara ei tohiks
+käima panna.
+
+\subsubsection{Südamelöögi pakkumine}
+Alglaadur peab genereerima südamelöögi signaali, et toitesüsteem ei püüaks
+toitepinget ära võttes CDHSile taaskäivitust teha.
+
+\subsubsection{Tarkvarapesa valimine kasutades CDHS\_FIRM viiku}
+Vea korral peab olema toitesüsteemil võimalus valida teine CDHSi tarkvara pilt.
+Selleks muudab toitesüsteem CDHS\_FIRM viigu väärtust.
+
+\subsubsection{Kahe mikrokontrolleri toetamine}
+Alglaadur peab töötama nii STM32F103l, mis on CDHSil, kui ka
+STM32F217l, mis on CAMil.
+
+\subsection{Kasutusjuhud}
+Siin on esitatud esialgsed kasutusjuhud, mis on töö autorile ette anti.
 \subsubsection{Vaikimisi alglaadimine}
 \begin{enumerate}
 \item Protsessor laeb alglaaduri
@@ -525,13 +589,24 @@ käigus logisse rohkem kirjutatama, kui logis ruumi on, siis jäetakse ikkagi lo
 alast välkmälus väljapoole kirjutamata.
 
 \subsubsection{Alguspunkt - \textbf{main.c}}
-todo: write about it
+Siin failis asub \textit{main} protseduur, mis initsialiseerib kõigepealt
+sisend/väljund viigud, logi ja välise FRAMiga suhtlemiseks vajaliku SPI või \iic
+mooduli. Seejärel kontrollib ta alglaaduri enda kontrollsummat. Pärast mida
+täidab ta käskude nimekirjas olevad käsud ja lõpetuseks teeb vaikimisi
+alglaadimise.
 
 \subsubsection{Testid - \textbf{tests.c}}
-Siin failis on mõned funktsioonid, mida kasutasin testimisel, kuid alglaaduris
-neid tegelikult vaja ei ole. Siin on kood FRAMist kirjutamise, lugemise
-testimiseks. Logisse kirjutamiseks, ja kood käskude nimekirja testkäskude
+Siin failis on mõned funktsioonid, mida kasutati testimisel, kuid alglaaduris
+neid tegelikult vaja ei ole. Siin on kood FRAMist kirjutamise ja lugemise
+testimiseks, logisse kirjutamiseks ning käskude nimekirja testkäskude
 panemiseks.
+
+\subsubsection{Linkija skriptid - \textbf{stm32\_fx\_flash.ld}}
+Tegemist on kahe failiga, mida vastavalt platvormile kasutatakse alglaaduri
+linkimiseks. Failides on defineeritud mäluregioonid, mis vastavad alglaaduri
+logile ja põhitarkvara pesadele, koos muutujatega, et alglaadurist neid regioone
+kasutada. Ühe pisikese lisana on ka pärast alglaaduri koodi-, andmete- ja
+nullidesektsiooni ka koht alglaaduri enda kontrollsumma jaoks.
 
 \subsection{Alglaaduri abiteek}
 Alglaaduri abiteek koosneb ühest päisefailist ja ühest C-failist, mis
@@ -608,10 +683,19 @@ ainult FRAMiga suhtlemise ajaks FRAMile vastavat seadme valimise viigu väljundi
 
 \section{Mida tulevikus paremini teha?}
 todo: kui aega ja jaksu, siis siia midagi kirjutada.
-\section{Summary}
-todo: write summary
 \section{Kokkuvõte}
 todo: kirjuta kokkuvõte
+\section{Summary}
+todo: write summary
+\section{Tänusõnad}
+Indrek Sünter oli see inimene, kes oli minu kontaktisik satelliidi meeskonnas.
+Tema tegeles CDHSi põhitarkvara kirjutamisega ja seega oli tema põhiline
+``klient'', kelle vajadusi alglaadur rahuldama pidi. Ta aitas arutada ja nõudeid
+paika panna, samuti luges mulle skeemidelt ette vajalikud sisend/väljund viigud
+ning aitas prototüüpide ühendamisel. Suured tänud talle!
+
+Lisaks saab tänu osaliseks minu hea sõber Mihkel Heidelberg, kes mulle seda
+teemat soovitas.
 
 \label{viited}
 \bibliographystyle{plain}
