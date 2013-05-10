@@ -562,6 +562,26 @@ sekstsiooni SRAMi, tähendab SRAMi initsialiseerimata andmete jaoks ja seejärel
 kutsub välja põhitarkvara \textit{main} protseduuri.
 
 
+\subsection{Programmi ettevalmistamine}
+\label{sec:boot:prep}
+Selleks, et põhitarkvara saaks kasutada alglaaduriga, tuleb eelnevalt programm
+niimoodi linkida, et arvestatakse sellega, millisele mäluaadressile tarkvara
+hiljem pannakse. Üks koht, kus kindlalt on absoluutsed mälu aadressid on see
+sama katkestusvektorite tabel. Kui programm saab niimoodi tehtud, et ta arvab,
+et näiteks taimeri katkestuse käsitlemise funktsioon on välkmälu alguses
+aadressil 0x800 09F0, ja programm kopeeritakse alglaaduri poolt ise kuhugi teise
+kohta kui välkmälu algus (0x800 0000), siis taimerikatkestuse korral hakatakse
+täitma käskusi aadressilt 0x800 09F0, kus tõenäoliselt paikneb alglaadur ise.
+
+Võrdluseks võib tuua näiteks Linuxi, kus ei ole vaja programme uuesti linkida,
+et neid erinevatel mäluaadressidel tööle panna, aga seda seepärast, et iga
+programmi jaoks tekitatakse virtuaalne mäluruum, kus programm on alati kindlal
+aadressil.
+
+\section{Muud implementatsioonidetailid}
+\subsection{Oma CRC arvutamine}
+\subsection{Firmware header}
+
 \section{Komponendid}
 Töö on jagatud kaheks Eclipse projektiks, millest üks on alglaadur ise ja teine on
 abiteek, mille abil saab alglaadurile käske anda, käske lugeda ja alglaaduri
@@ -750,19 +770,28 @@ olevate seadmete valimise viigud mitteaktiivseks. Ja alglaaduri töö ajal muude
 ainult FRAMiga suhtlemise ajaks FRAMile vastavat seadme valimise viigu väljundit.
 
 \section{Mida tulevikus paremini teha?}
-todo: kui aega ja jaksu, siis siia midagi kirjutada.
+\subsection{Programmi ettevalmistamine}
+Peatükis~\ref{sec:boot:prep} kirjeldati, miks on vaja programm linkida kindlale
+mäluaadressile. Samas on teada, et kompillaatorid suudavad genereerida ka koodi,
+mis ei sõltu positsioonist. Üheks järgmiseks uurimissuunaks on kontrollida, kas
+see töötab nagu soovitud. Katkestusvektorite tabel ise on siiski koht, kus on
+kindlalt absoluutsed aadressid, kuid samas võib alglaadur tarkvara kopeerimise
+ajal ise need aadressid siis vastavalt programmi asukohale transleerida. See
+võimaldaks selle, et üks satelliidile üleslaetud tarkvara pilt oleks kasutatav
+nii sisemise välkmälu primaarses kui ka sekundaarses pesas.
+
 \section{Kokkuvõte}
 todo: kirjuta kokkuvõte
 \section{Summary}
 todo: write summary
 \section{Tänusõnad}
-Indrek Sünter oli see inimene, kes oli minu kontaktisik satelliidi meeskonnas.
+Indrek Sünter oli see inimene, kes oli autori kontaktisik satelliidi meeskonnas.
 Tema tegeles CDHSi põhitarkvara kirjutamisega ja seega oli tema põhiline
 ``klient'', kelle vajadusi alglaadur rahuldama pidi. Ta aitas arutada ja nõudeid
-paika panna, samuti luges mulle skeemidelt ette vajalikud sisend/väljund viigud
-ning aitas prototüüpide ühendamisel. Suured tänud talle!
+paika panna, samuti luges ta elektriskeemidelt ette vajalikud sisend/väljund
+viigud ning aitas prototüüpide ühendamisel. Suured tänud talle!
 
-Lisaks saab tänu osaliseks minu hea sõber Mihkel Heidelberg, kes mulle selle
+Lisaks saab tänu osaliseks autori hea sõber Mihkel Heidelberg, kes autorile selle
 teema soovitas.
 
 \label{viited}
