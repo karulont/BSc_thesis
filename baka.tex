@@ -13,21 +13,29 @@
 \begin{document}
 \begin{titlepage}
 \begin{center}
-Tartu Ülikool\\
-Matemaatika-informaatika teaduskond\\
+	{\large TARTU ÜLIKOOL\\
+MATEMAATIKA-INFORMAATIKA TEADUSKOND\\
 Arvutiteaduse instituut\\
-Informaatika eriala
-\vfill
-Karl Tarbe\\[1cm]
-Alglaadur ESTCube-1 käsu- ja andmehaldussüsteemile ja kaameramoodulile\\[4mm]
-Bakalaureusetöö (6 EAP)
+Informaatika eriala}
+\vskip4cm
+{\large Karl Tarbe}\\[6mm]
+{\huge Alglaadur ESTCube-1 käsu- ja andmehaldussüsteemile ja kaameramoodulile}\\[4mm]
+{\large Bakalaureusetöö (6 EAP)}
+\end{center}
 \vspace{2cm}
 \begin{flushright}
-	Juhendaja: Meelis Roos
+	\large
+	Juhendaja: Meelis Roos, MSc
 \end{flushright}
+\vspace{2cm}
+\begin{tabular}{l p{8cm} r}
+	Autor: & \dotfill & "\dots" mai 2013\\
+	Juhendaja: & \dotfill & "\dots" mai 2013\\[6mm]
+	\multicolumn{2}{l}{Lubatud kaitsmisele}\\
+	Professor: & \dotfill & "\dots" mai 2013\\
+\end{tabular}
 \vfill
-Tartu 2013
-\end{center}
+\centerline{Tartu 2013}
 \end{titlepage}
 \setcounter{page}{2}
 \tableofcontents
@@ -449,7 +457,7 @@ CDHSi peal oli SPI siinil piisava suurusega FRAM. Teisest küljest CAMil ei ole
 SPI siinil asuvat FRAMi ja seega CAMil kasutatakse \iic siinil olevat FRAMi.
 
 \subsubsection{Kasutuslugude muutused}
-Kasutusloos~``\ref{sec:usecase:default}~\nameref{sec:usecase:default}'' pole vaja
+Kasutusloos~,,\ref{sec:usecase:default}~\nameref{sec:usecase:default}'' pole vaja
 teha kahte esimest tegevust, sest pärast mikrokontrolleri resetti on niigi kõik
 lisaseadmed väljalülitatud ja enamik sisend/väljund viikudest on seadistatud
 analoogsisendiks\cite{f1rm,f2rm}. Lisaks sellele leiti töö käigus, et sisemist
@@ -461,16 +469,16 @@ oskaks ümber lülitada teisele tarkvara pesale või CDHSi puhul teisele
 mikrokontrollerile. Samuti on ka neljas punkt natuke vale, sest CDHSil saab
 FRAMile ligi \iic asemel üle SPI andmesiini.
 
-Kasutusloos~``\ref{sec:usecase:upgrade}~\nameref{sec:usecase:upgrade}'' ei ole vaja
+Kasutusloos~,,\ref{sec:usecase:upgrade}~\nameref{sec:usecase:upgrade}'' ei ole vaja
 Välimises FRAMis kindlat pesa määrata, vaid selle asemel kasutatakse otseselt
 mäluaadressi, millelt tarkvara pilt leitakse. 
 
-Kasutuslugu~``\ref{sec:usecase:framerror}~\nameref{sec:usecase:framerror}''
+Kasutuslugu~,,\ref{sec:usecase:framerror}~\nameref{sec:usecase:framerror}''
 tuleb ka muuta, sest FRAM ei pruugi alati olla \iic siinil ning enne
 kopeerimise käsku tuleb FRAMist lugeda käskude nimekiri. Samuti käskude
 nimekirja kustutamiseks on vaja FRAMi kirjutada.
 
-Kasutusloo~``\ref{sec:usecase:fwselect}~\nameref{sec:usecase:fwselect}'' puhul
+Kasutusloo~,,\ref{sec:usecase:fwselect}~\nameref{sec:usecase:fwselect}'' puhul
 tehtud muudatus on selline, et käskude nimekiri ei pea olema tühi. Lihtsalt iga
 kord, kui on juttu vaikimisi pesas oleva tarkvara alglaadimisest, siis valitakse
 pesa vastavalt selle viigu väärtusele. Ja koodis on tagavara pesa asemel leebem
@@ -856,7 +864,7 @@ jää üle muud, kui vead lihtsalt dokumenteerida.
 Kui juhtub selline asi, et alglaadur tahab kontrollida näiteks tühjas välkmälu
 pesas oleva tarkvara pildi kontrollsummat, siis loeb ta päisest, et tarkvara
 suurus on 0xFFFF FFFF baiti ja hakkab seda arvutama. Tegelikult tuleks
-kontrollida, et tarkvara oleks mõistlikku pikkusega. Sobivaks maksimumiks oleks
+fontrollida, et tarkvara oleks mõistlikku pikkusega. Sobivaks maksimumiks oleks
 näiteks tarkvarapesa maksimaalne pikkus.
 
 Sama probleem esineb ka siis, kui enne FRAMist välkmällu kopeerimist hakatakse
@@ -893,12 +901,19 @@ nii sisemise välkmälu primaarses kui ka sekundaarses pesas.
 
 \section{Kokkuvõte}
 todo: kirjuta kokkuvõte
-\section{Summary}
-todo: write summary
-\section{Tänusõnad}
+\section*{Bootloader for Estcube-1 Command and Data Handling System and Camera module}
+\addcontentsline{toc}{section}{Summary}
+\begin{center}
+\bf Bachelor Thesis (6 ECTS)\\
+Karl Tarbe\\
+Summary
+\end{center}
+
+\section*{Tänusõnad}
+\addcontentsline{toc}{section}{Tänusõnad}
 Indrek Sünter oli see inimene, kes oli autori kontaktisik satelliidi meeskonnas.
 Tema tegeles CDHSi põhitarkvara kirjutamisega ja seega oli tema põhiline
-``klient'', kelle vajadusi alglaadur rahuldama pidi. Ta aitas arutada ja nõudeid
+,,klient'', kelle vajadusi alglaadur rahuldama pidi. Ta aitas arutada ja nõudeid
 paika panna, samuti luges ta elektriskeemidelt ette vajalikud sisend/väljund
 viigud ning aitas prototüüpide ühendamisel. Suured tänud talle!
 
@@ -910,15 +925,16 @@ teema soovitas.
 \bibliography{viited}
 
 \pagebreak
-\textbf{Lihtlitsents lõputöö reprodutseerimiseks ja lõputöö üldsusele
-kättesaadavaks tegemiseks}\\
+\section*{Lihtlitsents lõputöö reprodutseerimiseks ja lõputöö üldsusele
+kättesaadavaks tegemiseks}
 
 Mina Karl Tarbe (sünnikuupäev: 20.02.1991)
 \begin{enumerate}
 	\item
-		annan Tartu Ülikoolile tasuta loa (lihtlitsentsi) enda loodud teose ``Alglaadur
-		ESTCube-1 käsu- ja andmehaldussüsteemile ja kaameramoodulile'', mille juhendaja on
-		Meelis Roos,
+		annan Tartu Ülikoolile tasuta loa (lihtlitsentsi) enda loodud teose\\
+		,,Alglaadur ESTCube-1 käsu- ja andmehaldussüsteemile ja
+		kaameramoodulile'',\\
+		mille juhendaja on Meelis Roos,
 		\begin{enumerate}
 			\item 
 				reprodutseerimiseks säilitamise ja üldsusele kättesaadavaks
