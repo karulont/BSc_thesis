@@ -169,6 +169,7 @@ alapeatükis viitab mikrokontrollerite tehnilistele manuaalidele
 kirjeldab nende erinevusi. Alglaaduri tööks mittevajalikud osad jäävad
 kirjeldamata.
 \subsubsection{Sarnasused}
+\label{sec:mcu:same}
 Neis mõlemas on protsessorituumaks ARM arhitektuuriga Cortex-M3, mis on väga
 tihedalt seotud katkestustekontrolleriga. Täpsemalt selle kohta saab lugeda
 manuaalist \cite{CM3pm}.
@@ -187,7 +188,7 @@ mille väärtus kuueteistkümnendsüsteemis on 0x4C11DB7.
 
 Kuna alglaadur peab suhtlema väliste mäludega üle \iic ja SPI andmesiinide on
 oluline ka see, et mõlema jaoks on eraldi moodulid olemas. Ilma eraldiasuva
-moodulita peaks raiskama protsessoriaega, et ükshaaval erinevaid sisend-väljund
+moodulita peaks raiskama protsessoriaega, et ükshaaval erinevaid sisend/väljund
 viike juhtida, mis on küll võimalik, kuid ebaefektiivne, sest protsessor peab
 ühe andmevahetuse kella takti jooksul täitma mitmeid instruktsioone ja seega
 on andmevahetuse üldine kellasagedus kümneid kuni sadu kordi aeglasem, kui
@@ -209,7 +210,7 @@ mälupank. Lisaks sellele on esimese kontrolleri puhul kõik mälulehed sama
 suurusega, kuid ühe mälupangaga kontrolleris on mälulehtede suurused
 varieeruvad. \cite{f1fpm,f2fpm}
 
-Lisaks sellele on erinev sisend-väljund viikude seadistamine. Erinev on nii
+Lisaks sellele on erinev sisend/väljund viikude seadistamine. Erinev on nii
 lihtsalt viikude seadistamine kui ka mingite konkreetsete viikude seadistamine
 nii, et riistvaralised moodulid saaksid neid kasutada.
 
@@ -579,8 +580,87 @@ programmi jaoks tekitatakse virtuaalne mäluruum, kus programm on alati kindlal
 aadressil.
 
 \section{Muud implementatsioonidetailid}
-\subsection{Oma CRC arvutamine}
-\subsection{Firmware header}
+\subsection{Alglaaduri kontrollsumma kontrollimine}
+Alglaaduri enda kontrollsumma arvutamiseks kasutatakse riistvaramoodulit,
+millest oli juttu peatükis~\ref{sec:mcu:same}.
+
+Kui aga kontrollsumma on arvutatud tuleb seda millegagi võrrelda. Selleks on
+linkija skriptis alglaaduri lõppu lisatud üks 4 baidi piirile joondatud
+32-bitine muutuja. Muutuja on 4 baidi piirile joondatud, sest kontrollsumma
+arvutamise moodul arvutab just 4 baidi ehk 32 biti kaupa. Selle muutuja
+algväärtustamisel on tehtud lisaeeldus, et alglaadur ei saa kannatada enne
+esimest töölepanemist. Seda eeldust on vaja, sest linkija paneb selle väärtuseks
+lihtsalt 0xFFFF FFFF ja esimesel korral, kui alglaadur oma kontrollsumma
+arvutab, programmeeritakse välkmälus see väärtus üle tegeliku kontrollsummaga.
+Kusjuures esialgne väärtus 0xFFFF FFFFF ei ole niisama valitud. See väärtus on
+sellepärast, et selline on välkmälu kustutatud asendis, ja nii on võimalik see
+üle programmeerida ilma tervet sektorit eelnevalt kustutamata.
+
+\subsection{Tarkvara pildi päis}
+Tarkvara pilti võib vaadelda, kui lihtsalt ühte suurt kogu andmeid, mille
+alguses on katkestusvektorite tabel. Alglaaduri seisukohast oleks vajalik, et
+oleks teada ka nende andmete pikkus ja kontrollsumma. Selleks lisatakse
+tarkvarapildi ette nii FRAMis kui ka välkmälus pisike päis, kus on kolm 32
+bitist välja: suurus, versioon ja kontrollsumma. Versioonivälja alglaadur ise
+kunagi ei puutu, aga põhitarkvara ise võib sellest kasu saada, et
+versiooninumber on ka olemas.
+
+Selle päise lisamine aga tekitas ühe lisaprobleemi. Nimelt on välkmälus valitud
+tarkvarapesad selliselt, et need algaksid välkmälu lehtede piirilt, et neid
+oleks mugav kustutada. Need on suhteliselt ümmargused aadressid, kus ümmargune
+tähendab seda, et aadressi madalamad bitid on nullid. Enne selle päise lisamist
+töötas põhitarkvara normaalselt, kuid pärast päise lisamist esinesid probleemid
+põhitarkvara töös. Põhjuseks oli katkestusvektorite tabeline nihkumine päise
+võrra edasi, aga katkestusvektorite tabel peab olema ka mõnevõrra ümmargusel
+aadressil: 9 madalamat bitti peavad olema nullid\cite{cm3pm}.
+
+Kompenseerimiseks lisati lihtsalt päise ja ülejäänud tarkvarapildi vahele 500
+baiti polstrit, mis nihutas katkestusvektorite tabeli jälle piisavalt
+ümmargusele aadressile. See lahendus küll töötab, kuid raiskab ära 500 baiti.
+Alternatiivina oleks saanud panna selle päise pärast katkestusvektorite tabelit,
+sest katesktusvektorite tabel on fikseeritud pikkusega, kuid see oleks rohkem
+tööd võtnud ja samuti oleks siis pidanud eraldi arvutama kontrollsumma
+katkestusvektorite tabelist ja ülejäänud osast, mis jääks teisele poole päist.
+
+Tarkvarapilt koos päise ja polsterdusega on ühesugune nii FRAMis kui ka
+välkmälus, kuigi FRAMis pole seda polsterdust vaja. Tarkvara kontrollsumma
+arvutamisel ei arvutata sisse päist ega polsterdust. Samas saab kasutada seda
+polsterdust, et seal veel mingeid metaandmeid tarkvara pildi kohta hoida, sest ka
+see polsterdust kopeeritakse alglaaduri poolt kohusetundlikult FRAMist
+välkmällu.
+
+\subsection{Käskude nimekiri}
+Käskude nimekiri asub FRAMis. Kasutades alglaaduri abiteeki saab sinna kirjutada
+maksimaalselt 3 käsku ja valida on kahe käsutüübi vahel: kopeerimine või
+alglaadimine. Iga käsk koos oma parameetritega kirjutatakse FRAMi kahekordselt,
+kusjuures teine kord on kõik bitid inverteeritud. 
+
+Et vältida vanade käskude nimekirja sattumist, kirjutatakse iga käsu lõppu veel
+kaks baiti, mille väärtuseks on 0xFF. See tagab selle, et kui enne oli kolm
+käsku nimekirjas ja siis kirjutati uus käsk, kirjutavad need kaks lisabaiti üle
+vana käsu alguse. Ja seega alglaadur ei loe kaugemale ühest käsust.
+
+Käskude nimekirja tühendamine tähendab lihtsalt maksimaalse suurusega alale
+0xFFide kirjutamist. Kusjuures käskude nimekirja lugedes ei eristata, kas
+käskude nimekiri oli tühi või lihtsalt esimene bait nimekirjas oli vale.
+
+Ühe puudusena võib välja tuua selle, et käskude nimekirja lugedes ei
+kontrollita, kas on ainult kolm käsku. Ja nii saab FRAMi kirjutada ka sellise
+käskude nimekirja, kus on näiteks sadu kopeerimiskäske, aga see ei ole probleem,
+sest käskude nimekirja ei loeta korraga mälusse vaid täidetakse käskhaaval.
+
+
+\subsection{Südamelöögi signaali genereerimine}
+Südemelöögi signaali võiks genereerida kasutades selleks riistvaralist taimerit,
+kuid see oleks vale, sest tarkvara võib kokku joosta, kuid taimer genereerib
+signaali edasi. Seega on õigem tarkvarast manuaalselt seda signaali genereerida.
+Pealegi see signaal ei pea olema midagi erilist. Lihtsalt ühe väljundviigu
+väärtust tuleb muuta. Ning pole oluline, kui seda tehakse liiga tihti.
+
+Viigu väärtust muudetakse vahetult enne põhitarkvara alglaadimist ja kahes
+funktsioonis, mida kasutatakse, et oodata mingite operatsioonide lõppemist.
+Nendest esimene on välkmälu operatsioonide jaoks ja teine \iic FRAMi jaoks. Siit
+aga tuleb välja üks probleem, mis on kirjas peatükis~\ref{sec:prob:beat}. 
 
 \section{Komponendid}
 Töö on jagatud kaheks Eclipse projektiks, millest üks on alglaadur ise ja teine on
@@ -737,7 +817,7 @@ Töö autor kopeeris alglaaduri jaoks need registrite nimesid ja aadresse siduva
 päisfailid ühest STMicroelectronicsi näidisprojektist. Testides ja
 implementeerides \iic suhtlust CAMi prototüübil, tekkis probleem, et asi
 lihtsalt ei töödanud. Pärast mitmeid tunde vea otsimist leiti, et
-sisend-väljund viigud ei ole õigesti seadistatud, et \iic moodul saaks neid
+sisend/väljund viigud ei ole õigesti seadistatud, et \iic moodul saaks neid
 kasutada. Kui kõik teised veakohad olid välistatud, avastati vea tegelik põhjus.
 Nimelt oli viga tootja poolt tehtud päises. Viikude seadmistamisega
 riistvaramoodulile seotud registrile vahetult eelneva registri suurus oli päises
@@ -746,7 +826,7 @@ et vajalikust registrist kirjutati 16 biti võrra mööda.
 \subsubsection{\textit{Chip Write Enable}}
 Kui \iic suhtlus CAMi prototüübil toimima saadi ja suhtlus FRAMiga toimus, siis
 asuti seda sama tegema ka CDHSi plaadil. Riistvaraline \iic moodul ise oli küll
-samasugune, aga sisend-väljund viikude seadistamine oli natuke erinev. Tundus
+samasugune, aga sisend/väljund viikude seadistamine oli natuke erinev. Tundus
 nagu asi töötaks, aga FRAMi kirjutades ja siis lugedes ei olnud tagasiloetavad
 andmed samad, mis sinna kirjutati.
 
@@ -769,6 +849,37 @@ tagastada. Probleemi lahendus oli jällegi lihtne: määrati kõigi SPI siinil
 olevate seadmete valimise viigud mitteaktiivseks. Ja alglaaduri töö ajal muudeti
 ainult FRAMiga suhtlemise ajaks FRAMile vastavat seadme valimise viigu väljundit.
 
+\section{Teadaolevad vead}
+Käesoleva dokumendi kirjutamise ajal on Estcube-1 juba Maa orbiidil ja enam ei
+jää üle muud, kui vead lihtsalt dokumenteerida.
+\subsection{Puuduoleva tarkvara pildi kontrollsumma arvutamine}
+Kui juhtub selline asi, et alglaadur tahab kontrollida näiteks tühjas välkmälu
+pesas oleva tarkvara pildi kontrollsummat, siis loeb ta päisest, et tarkvara
+suurus on 0xFFFF FFFF baiti ja hakkab seda arvutama. Tegelikult tuleks
+kontrollida, et tarkvara oleks mõistlikku pikkusega. Sobivaks maksimumiks oleks
+näiteks tarkvarapesa maksimaalne pikkus.
+
+Sama probleem esineb ka siis, kui enne FRAMist välkmällu kopeerimist hakatakse
+kontrollima FRAMis oleva tarkvara pildi kontrollsummat.
+
+\subsection{Südamelöögi genereerimine}
+Südamelöögi genereerimisel on tegelikult kaks probleemi, millest esimene on küll
+lihtne lohakusviga. Nimelt jäi CAMi versioonil südamelöögi signaali
+genereerimiseks kasutataval funktsiooni keha tühjaks. Seega CAMi peal alglaadur
+ei genereeri ühtegi lööki.
+
+Teine probleem tulenes sellest, et suhteliselt lõppfaasis oli vaja CDHSi peal FRAMiga
+suhtlus ümber teha SPI andmesiini peale. Ja nii jäi sinna südamelöögi signaali
+genereerimine lisamata. See võib olla probleem, kui näiteks kopeerimise käsu
+ajal kõigepealt välises FRAMis oleva tarkvara pildi kontrollsummat arvutatakse
+ja selle vältel ühtegi südamelöögi signaali ei genereerita. Aga on võimalik, et
+see ajavahemik pole nii pikk, et toitesüsteem selle peale taaskäivituse teeks.
+
+Nende kahe probleemi leevendamiseks võib öelda, et alglaaduri tegemise ajal
+polnud toitesüsteemis südamelöögi jälgimine veel implementeeritud ja töö autor
+pole kindel, kas selleni üldse jõuti.
+
+\label{sec:prob:beat}
 \section{Mida tulevikus paremini teha?}
 \subsection{Programmi ettevalmistamine}
 Peatükis~\ref{sec:boot:prep} kirjeldati, miks on vaja programm linkida kindlale
