@@ -3,12 +3,24 @@
 \usepackage[estonian]{babel}
 \usepackage{cite}
 \usepackage[hidelinks]{hyperref}
+\usepackage[xindy,toc,acronym,nonumberlist]{glossaries}
 
 \title{Alglaadur ESTCube-1 käsu- ja andmehaldussüsteemile ja kaameramoodulile}
 \author{Karl Tarbe}
 
+% I2C
+\newcommand{\iic}{I${}^2$C}
 
-\newcommand{\iic}{I${}^2$C }
+%stupid glossary
+\newacronym{i2c}{\iic}{\textit{Inter-Integrated Circuit}}
+\newacronym{spi}{SPI}{\textit{Serial Pheripheral Interface}}
+\newacronym{cam}{CAM}{\textit{Camera module}}
+\newacronym{cdhs}{CDHS}{\textit{Command and Data Handling System}}
+\newacronym{sram}{SRAM}{\textit{Static Random Access Memory}}
+\newacronym{fram}{FRAM}{\textit{Ferroelectric Random Access Memory}}
+\renewcommand*{\glspostdescription}{}
+\makeglossaries
+\deftranslation{Acronyms}{Lühendid}
 
 \begin{document}
 \begin{titlepage}
@@ -19,7 +31,7 @@ Arvutiteaduse instituut\\
 Informaatika eriala}
 \vskip4cm
 {\large Karl Tarbe}\\[6mm]
-{\huge Alglaadur ESTCube-1 käsu- ja andmehaldussüsteemile ja kaameramoodulile}\\[4mm]
+{\huge\bf Alglaadur ESTCube-1 käsu- ja andmehaldussüsteemile ja kaameramoodulile}\\[4mm]
 {\large Bakalaureusetöö (6 EAP)}
 \end{center}
 \vspace{2cm}
@@ -40,6 +52,9 @@ Informaatika eriala}
 \setcounter{page}{2}
 \tableofcontents
 
+\glsaddall
+\printglossaries
+
 \section{Sissejuhatus}
 Aasta 2008 suvel alustati tudengisatelliidi projektiga. Esialgu pidi tegemist
 olema väga lihtsa satelliidiga, kus peal on võib-olla üks või kaks
@@ -51,6 +66,7 @@ olema ja iga keerulise tarkvara puhul esineb tavaliselt vigu. Siinkohal muutubki
 aktuaalseks alglaadur, mille abil saab tarkvara uuendada.
 
 \subsection{Estcube-1}
+todo: kirjutada lühidalt satelliidist
 \subsubsection{Missioon}
 Aastal 2006 leiutati uudne viis, kuidas kasutada päikeselt tulevat laetud
 osakeste voogu ehk päikesetuult liikumiseks. Selleks kasutatakse peenikesi
@@ -65,70 +81,67 @@ Estcube-1 missiooniks on esimest korda ajaloos katsetada elektrilist
 päikesepurje kosmoses. Satelliidi pardal olev juhtmete kimp kaalub 0,2 grammi ja
 on 20 meetri pikkune. Stardi ajal on juhtmed keritud kokku rulli peale, et
 stardimõõtmetesse ära mahtuda. Maa orbiidil pannakse satelliit pöörlema ja
-tsentrifugaaljõu toimel keritakse päikesepuri aeglaselt rullilt maha.
-Elektriline mootor kerib rulli lahti ja tsentrifugaaljõu tõttu kaugeneb puri
-satelliidist ühtlaselt.
+elektriline mootor kerib rulli lahti ning tsentrifugaaljõu tõttu kaugeneb
+juhtmete kimp satelliidist ühtlaselt.
 \subsection{Käsu- ja andmehaldussüsteem - CDHS}
-\textit{Command and Data Handling System} ehk käsu- ja andmehaldussüsteem on
-kavandatud satelliidi peamiseks pardaarvutiks. Peamised arvutused, mis määravad
-satelliidi positsiooni, toimuvad just CDHSis. CDHSi salvestatakse igasugu
-erinevaid andmeid, mida sõltuvalt maapealt tulevatele käskudele ka tagastatakse.
+\gls{cdhs} ehk käsu- ja andmehaldussüsteem on kavandatud satelliidi peamiseks
+pardaarvutiks. Peamised arvutused, mis määravad satelliidi positsiooni, toimuvad
+just \gls{cdhs}is. Lisaks salvestatakse \gls{cdhs}i igasugu erinevaid andmeid,
+mida sõltuvalt maapealt tulevatele käskudele ka tagastatakse.
 
 Süsteem koosneb nii tarkvarast kui ka elektroonikast, mille peal tarkvara
 jooksutatakse. Antud bakalauresetöö raames pole põhitarkvara detailid eriti
-olulised, aga elektroonika on natuke oluline. Nimelt kuuluvad CDHSi juurde ka
-mitmed mälud, kus hoitakse erinevaid andmeid. Nendest mäludest oluliseks on
-Ferroelektrilised juhupöördusega mälud (FRAM), sest need on radiatsioonirikkas
-keskkonnas mitu korda töökindlamad kui tavapärased välkmälud (FLASH). Täpsemalt
-on mäludest juttu peatükis~\ref{sec:m2lud}.
+olulised, aga elektroonika on natuke oluline. Nimelt kuuluvad \gls{cdhs}i juurde
+ka mitmed mälud, kus hoitakse erinevaid andmeid. Nendest mäludest oluliseks on
+ferroelektrilised juhupöördusega mälud (\gls{fram}), sest need on
+radiatsioonirikkas keskkonnas mitu korda töökindlamad kui tavapärased välkmälud
+(\textit{Flash memory}). Täpsemalt on mäludest juttu peatükis~\ref{sec:m2lud}.
 
 Protsessorituumaks on ARM Cortex-M3, mis paikneb STMicroelectronics-i poolt
 valmistatud mikrokontrolleris STM32F103, millest tuleb lähemalt juttu
-peatükis~\ref{sec:mcu}. Üheks märkimisväärseks omaduseks CDHSi puhul on see, et
+peatükis~\ref{sec:mcu}. Üheks märkimisväärseks omaduseks \gls{cdhs}i puhul on see, et
 süsteemis on osaline riistvaraline dubleeritus: trükkplaadil on kaks identset
 mikrokontrollerit. Esialgu jookseb neist üks, kuid kui tuvastatakse, et see
 mikrokontroller enam ei tööta, lülitatakse ümber teisele mikrokontrollerile.
-Selle vea tuvastamise ja ümberlülitamise eest vastutab toitesüsteem. Lülitatakse
+Vea tuvastamise ja ümberlülitamise eest vastutab toitesüsteem. Lülitatakse
 ümber ka andmesiinid, et mikrokontrollerist väljajäävad seadmed oleksid korraga
 ühenduses ainult ühe mikrokontrolleriga.
 
-Toitesüsteemis on implementeeritud ka niiöelda väline valvekoer. Kui CDHSi
+Toitesüsteemis on peaks olema ka niiöelda väline valvekoer. Kui \gls{cdhs}i
 mikrokontroller aegajalt ühte viiku ei vilguta, siis toitesüsteem tõlgendab seda
-sellena, et CDHS on määramata olekus, ja taaskäivitab CDHSi temalt ajutiselt
-toite ära võtmise abil. Seda signaali, mida CDHS genereerima peab nimetatakse
-südamelöögi signaaliks, sest nagu inimese puhulgi, kui seda signaali pole, siis
-süsteem või inimene on surnud.
+sellena, et \gls{cdhs} on määramata olekus, ja taaskäivitab \gls{cdhs}i temalt ajutiselt
+toite äravõtmise abil. Seda signaali, mida \gls{cdhs} genereerima peab nimetatakse
+südamelöögi signaaliks, sest kui seda signaali pole, siis on süsteem ,,surnud'',
+nagu ilma südamelöökideta oleks surnud ka inimene.
 
 \subsection{Kaameramoodul - CAM}
 Kaameramooduli ülesandeks on teha pilte kontrollimaks, kas päikesepurje
-veljakerimine õnnestub nii nagu soovitud. Sekundaarne ülesanne on teha maast ja
-ka eestist pilte, mida saaks kasutada teaduse populariseerimise eesmärgil.
-Pilte saab teha VGA resolutsioonis ehk 640\(\times\)480 pikslit, mida on üldises
-mõttes küll väga vähe, kuid loodetavasti piisavalt, et etteantud ülesandeid
-täita.
+veljakerimine õnnestub nii nagu soovitud. Sekundaarne ülesanne on teha Maast ja
+ka Eestist pilte, mida saaks kasutada teaduse populariseerimise eesmärgil.
+Pilte saab teha VGA resolutsioonis ehk 640\(\times\)480 pikslit, mida on
+tänapäeval küll väga vähe, kuid piisavalt, et etteantud ülesandeid täita.
 
-Sarnaselt CDHSiga juhib mooduli tööd mikrokontroller, mille tootjaks on
+Sarnaselt \gls{cdhs}iga juhib mooduli tööd mikrokontroller, mille tootjaks on
 STMicroelectronics. Mikrokontrolleriks on STM32F217, mis laias laastus ei erine
-eriti CDHSi peal kasutatavast STM32F103st, kuid nendest erinevustest lähemalt
+eriti \gls{cdhs}i peal kasutatavast STM32F103st, kuid nendest erinevustest lähemalt
 saab lugeda peatükist~\ref{sec:mcu}.
 
-Teine sarnasus CDHSiga on see, et ka CAMil on mikrokontrollerist väljajäävad
-mälud. Täpsemalt on alglaaduri jaoks oluline, et CAMil asub FRAM tüüpi mälu,
-millega mikrokontroller saab suhelda üle \iic andmesiini.
+Teine sarnasus \gls{cdhs}iga on see, et ka \gls{cam}il on mikrokontrollerist väljajäävad
+mälud. Täpsemalt on alglaaduri jaoks oluline, et \gls{cam}il asub \gls{fram} tüüpi mälu,
+millega mikrokontroller saab suhelda üle \gls{i2c} andmesiini.
 
-Ka CAMi jaoks on toitesüsteemis eraldi signaal, kuhu CAM peab südamelööke
-genereerima täpselt samamoodi, nagu seda teeb CDHS.
+Ka \gls{cam}i jaoks on toitesüsteemis eraldi signaal, kuhu \gls{cam} peab südamelööke
+genereerima täpselt samamoodi, nagu seda teeb \gls{cdhs}.
 
 \subsection{Mälud}
 \label{sec:m2lud}
 Alglaadur puutub kokku kolme tüüpi mäludega.
 
 \subsubsection{Juhupöördusega staatiline mälu - SRAM}
-Lühend SRAM tuleb inglise keelest \textit{Static Random Access Memory}. Tegemist
-on hävimäluga ehk seal olevad andmed kaovad, kui mälul ei ole voolu. Mälu asub
-mikrokontrolleri sees ja seda kasutab programm tavapärase operatiivmäluna.
-Kasutusel olevad mikrokontrollerid lubavad sealt ka instruktsiooni käivitada,
-aga seda funktsionaalsust alglaaduris ei kasutata.
+\Gls{sram} on hävimälu ehk seal olevad andmed kaovad, kui mälul ei ole voolu.
+Mälu asub mikrokontrolleri sees ja seda kasutab programm tavapärase
+operatiivmäluna.  Kasutusel olevad mikrokontrollerid lubavad sealt ka
+instruktsioone käivitada, aga seda funktsionaalsust alglaaduris ei kasutata.
 
 \subsubsection{Välkmälu - Flash}
 Tegemist on enimlevinud tehnoloogiaga säilmälude hulgas. Antud juhul paikneb
@@ -136,27 +149,26 @@ seda tüüpi mälu mikrokontrolleri sees. Seal asub tarkvara, mida mikroprotsess
 asub käivitama. Antud mikrokontrollerite puhul on mälu juhupöördusega nii
 kirjutamiseks, kui ka lugemiseks, aga kirjutamiseks peab mälu olema eelnevalt
 kustutatud ehk siis mälus peab olema eelnevalt vastava pikkusega ühtedest
-koosnev bitijada. CDHSi peal kasutatava STM32F103 mikrokontrolleril toimub
-välkmällusse kirjutamine alati 16 biti kaupa. CAMil kasutataval STM32F217l saab
-valida järgnevate pikkuste vahel: 64, 32, 16 või 8 bitti \cite{f2fpm}. See valik
-sõltub ka olemasolevast toitepingest, kuid et STM32F103 peal valikut ei ole ja
-alglaadur peab mõlema peal töötama, siis sarnasuse huvides on valitud STM32F217
-korral samuti 16 bitine pikkus.
+koosnev bitijada. \gls{cdhs}i peal kasutatava STM32F103 mikrokontrolleril toimub
+välkmällusse kirjutamine alati 16 biti kaupa. \gls{cam}il kasutataval STM32F217l
+saab valida järgnevate pikkuste vahel: 64, 32, 16 või 8 bitti \cite{f2fpm}. See
+valik sõltub ka olemasolevast toitepingest, kuid et STM32F103 peal valikut ei
+ole ja alglaadur peab mõlema peal töötama, siis sarnasuse huvides on valitud
+STM32F217 korral samuti 16 bitine pikkus.
 
 Välkmälu on jagatud mälulehtedeks, mis võivad olla kõik sama suurusega nagu
 STM32F103l või ka erineva suurusega nagu STM32F217l. Välkmälust kustutamine
-toimub antud mikrokontrollerite puhul toimub kas terve mälu või ühe mälelehe
-kaupa. Kusjuures kuigi sisuliselt on tegemist sama asjaga nimetatakse STM32F103
-puhul mälulehti mälulehtedeks (\textit{memofy page}), aga STM32F217
-dokumentatsioonis on kasutusel termin mälusektor (\textit{memory sector}).
-\cite{f1fpm,f2fpm}
+toimub antud mikrokontrollerite puhul, kas terve mälu või ühe mälelehe kaupa.
+Kusjuures kuigi sisuliselt on tegemist sama asjaga nimetatakse STM32F103 puhul
+mälulehti mälulehtedeks (\textit{memofy page}), aga STM32F217 dokumentatsioonis
+on kasutusel termin mälusektor (\textit{memory sector}). \cite{f1fpm,f2fpm}
 
 \subsubsection{Ferroelektriline juhupöördusega mälu - FRAM}
-FRAM on nagu välkmälugi säilmälu, kuhu jäävad andmed alles ka siis, kui seadmelt
-toide ära võtta. Nii CDHSil kui ka CAMil jääb FRAM mikrokontrollerist väljapoole
-ja sellega tuleb suhelda üle SPI või \iic andmesiini.
+\gls{fram} on nagu välkmälugi säilmälu, kuhu jäävad andmed alles ka siis, kui seadmelt
+toide ära võtta. Nii \gls{cdhs}il kui ka \gls{cam}il jääb \gls{fram} mikrokontrollerist väljapoole
+ja sellega tuleb suhelda üle \gls{spi} või \gls{i2c} andmesiini.
 
-FRAMil on mitmeid eeliseid välkmälu ees:
+\gls{fram}il on mitmeid eeliseid välkmälu ees:
 \begin{itemize}
 	\item lubatud ülekirjutamise tsükleid on rohkem,
 	\item voolutarve on kordades väiksem,
@@ -164,18 +176,24 @@ FRAMil on mitmeid eeliseid välkmälu ees:
 	\item mälu on juhupöördusega,
 	\item mälu on radiatsioonikindlam.
 \end{itemize}
-Kuid FRAMil on ka kaks miinust: esiteks on andmetihedus suhteliselt väike ja teiseks
+Kuid \gls{fram}il on ka kaks miinust: esiteks on andmetihedus suhteliselt väike ja teiseks
 on tema hind kõrgem. Seda tüüpi mälu kasutatakse satelliidil, sest see on
 radiatsioonikindlam. \cite{fram}
 
 \subsection{Mikrokontrollerid STM32F103 ja STM32F217}
 \label{sec:mcu}
 Mikrokontrollerid STM32F103 ja STM32F217 on mõlemad STMicroelectronics-i tooted,
-mida kasutatakse vastavalt CDHSil ja CAMil. Üldiselt kogu järgnev tekst siin
+mida kasutatakse vastavalt \gls{cdhs}il ja \gls{cam}il. Üldiselt kogu järgnev tekst siin
 alapeatükis viitab mikrokontrollerite tehnilistele manuaalidele
 \cite{f1rm,f2rm}. Esimene alamosa kirjeldab kontrollerite ühisosa ja teine
 kirjeldab nende erinevusi. Alglaaduri tööks mittevajalikud osad jäävad
 kirjeldamata.
+
+Lisatäpsustena tuleb öelda, et antud töös kasutatakse nimetusi STM32F103 ja
+STM32F217 kui konkreetsete mikrokontrollerite nimedena, kuid tegelikult
+tähistavad need mikrokontrollerite seeriat, mis erinevad näiteks mälumahtude,
+sisend/väljund viikude arvu või kontrolleri füüsilise pakendi poolest.
+
 \subsubsection{Sarnasused}
 \label{sec:mcu:same}
 Neis mõlemas on protsessorituumaks ARM arhitektuuriga Cortex-M3, mis on väga
@@ -184,9 +202,9 @@ manuaalist \cite{CM3pm}.
 
 Mikrokontroller erineb mikroprotsessorist just selle poolest, et lisaks
 mikroprotsessorile on mikrokontrolleris olemas ka ülejäänud vajalik, et tööd
-teha: operatiivmälu, mälu tarkvara masinkoodi jaoks ja mitmed moodulid välise
-maailmaga või väliste seadmetega suhtlemiseks. Mõned moodulid, mida alglaadur
-oma töös kasutab aga on õnneks kasutamise seisukohalt täpselt samasugused.
+teha: operatiivmälu, mälu tarkvara jaoks ja mitmed moodulid välise maailmaga ehk
+väliste seadmetega suhtlemiseks. Mõned moodulid, mida alglaadur oma töös
+kasutab, on õnneks kasutamise seisukohalt täpselt samasugused.
 
 Üheks selliseks mooduliks on kontrollsumma arvutamise üksus (\textit{CRC
 calculation unit}), mille abil saab efektiivselt arvutada 32 bitist
@@ -194,12 +212,12 @@ kontrollsummat(CRC-32). On mitmeid erinevaid standardeid, mille järgi CRC-32te
 arvutada. Antud moodul kasutab Ethernet-is ja mujal kasutusel olevat polünoomi,
 mille väärtus kuueteistkümnendsüsteemis on 0x4C11DB7. 
 
-Kuna alglaadur peab suhtlema väliste mäludega üle \iic ja SPI andmesiinide on
+Kuna alglaadur peab suhtlema väliste mäludega üle \gls{i2c} ja \gls{spi} andmesiinide on
 oluline ka see, et mõlema jaoks on eraldi moodulid olemas. Ilma eraldiasuva
 moodulita peaks raiskama protsessoriaega, et ükshaaval erinevaid sisend/väljund
 viike juhtida, mis on küll võimalik, kuid ebaefektiivne, sest protsessor peab
 ühe andmevahetuse kella takti jooksul täitma mitmeid instruktsioone ja seega
-on andmevahetuse üldine kellasagedus kümneid kuni sadu kordi aeglasem, kui
+on andmevahetuse üldine kellasagedus kümneid kuni sadu kordi väiksem, kui
 protsessori kellasagedus.
 
 Ja lõpetuseks võib öelda, et alglaadimise protseduur on mõlemal kontrolleril
@@ -215,30 +233,32 @@ Alglaaduri seisukohalt oluliseks erinevuseks on aga sisemise välkmälu erinev
 ülesehitus. STM32F103l on välkmälu jagatud kaheks mälupangaks (\textit{memory
 bank}), millele on juurdepääsuks erinevad registrid, aga STM32F217l on üks
 mälupank. Lisaks sellele on esimese kontrolleri puhul kõik mälulehed sama
-suurusega, kuid ühe mälupangaga kontrolleris on mälulehtede suurused
-varieeruvad. \cite{f1fpm,f2fpm}
+suurusega, kuid teises kontrolleris on mälulehtede suurused varieeruvad.
+\cite{f1fpm,f2fpm}
 
 Lisaks sellele on erinev sisend/väljund viikude seadistamine. Erinev on nii
-lihtsalt viikude seadistamine kui ka mingite konkreetsete viikude seadistamine
-nii, et riistvaralised moodulid saaksid neid kasutada.
+lihtsalt viikude seadistamine kui ka mingite viikude määramine riistvara
+moodulitele kasutamiseks.
 
 \section{Süsteemi nõuded}
 Käesolevas peatükis on väljatoodud alglaadurile alguses paikapandud nõuded ja
 kasutusjuhud. Nende kirjapanemisega tegeles peamiselt Indrek Sünter, kes arendab
-tarkvara CDHSile. 
+tarkvara \gls{cdhs}ile. Siin peatükis pole eriti räägitud \gls{cam}ist, sest
+alglaadur on mõeldud siiski peamiselt \gls{cdhs}ile ning nõuded kirjutas
+\gls{cdhs}i arendaja, aga \gls{cam}il kehtivad samad nõuded.
 \subsection{Alglaaduri käsud}
 \subsubsection{Käsk kindla tarkvara alglaadimiseks}
-Vajalik, et vahetada kasutatavat tarkvara. Käsu abil saab valida millises pesas
+Vajalik, et vahetada kasutatavat tarkvara. Käsu abil saab valida, millises pesas
 olev tarkvara alglaetakse.
 
 \subsubsection{Käsk tarkvara kopeerimiseks}
-Vajalik, et saaks teostada tarkvara uuendamist, kui CDHS töötab. Käsu eesmärk on
-kopeerida tarkvara ühest mäluseadmest teise. Enne kopeerimist tuleb
+Vajalik, et saaks teostada tarkvara uuendamist, kui \gls{cdhs} töötab. Käsu
+eesmärk on kopeerida tarkvara ühest mäluseadmest teise. Enne kopeerimist tuleb
 valideerida tarkvara pildi terviklikkus.
 
 \subsection{Alglaaduri käskude nimekiri}
 \subsubsection{Käskude lisamine nimekirja}
-Vajalik tarkvara uuendamiseks, kui CDHS töötab. Eeldab, et CDHSi põhitarkvara
+Vajalik tarkvara uuendamiseks, kui \gls{cdhs} töötab. Eeldab, et \gls{cdhs}i põhitarkvara
 töötab.
 
 \subsubsection{Vigade logimine}
@@ -250,8 +270,8 @@ Enamasti on alglaaduri käskude nimekiri tühi ja selleks ajaks oleks vaja head
 ohutut vaikimisi käitumist, mis alglaeks olemasoleva tarkvara.
 
 \subsubsection{Õnnestumise logimine}
-Kui midagi alglaaduri töös halvasti läheb, siis on vaja teada, mida alglaadur
-edukalt juba ära tegi.
+Kui midagi alglaaduri töös halvasti läheb, siis on vaja teada, mis alglaadur
+edukalt juba korda saatis.
 
 \subsubsection{Käskude nimekirja valideerimine}
 Radiatsiooni või mingi muu nähtuse tõttu võib käskude nimekiri kahjustada saada.
@@ -265,8 +285,8 @@ tarkvara pilte. Seega peab alglaadur suutma väliste mäluseadmetega suhelda.
 
 \subsubsection{Sisemisse välkmällu kirjutamine}
 Mikrokontroller suudab koodi jooksutada ainult sisemisest välkmälust või
-SRAMist, seega peab alglaadur suutma paigutada tarkvara sinna, kus seda saab
-käivitada.
+\gls{sram}ist, seega peab alglaadur suutma paigutada tarkvara sinna, kus seda saab
+käivitada ja hoiustada.
 
 \subsubsection{Tarkvara kontrollsumma kontrollimine kopeerimisel}
 Tarkvara võib välises mälus kahjustada saada, seega tuleb enne kopeerimist
@@ -278,18 +298,20 @@ käima panna.
 
 \subsubsection{Südamelöögi pakkumine}
 Alglaadur peab genereerima südamelöögi signaali, et toitesüsteem ei püüaks
-toitepinget ära võttes CDHSile taaskäivitust teha.
+toitepinget ära võttes \gls{cdhs}ile taaskäivitust teha.
 
-\subsubsection{Tarkvarapesa valimine kasutades CDHS\_FIRM viiku}
-Vea korral peab olema toitesüsteemil võimalus valida teine CDHSi tarkvara pilt.
-Selleks muudab toitesüsteem CDHS\_FIRM viigu väärtust.
+\subsubsection{Tarkvarapesa valimine kasutades CDHS\_FIRM signaali}
+Vea korral peab olema toitesüsteemil võimalus valida teine \gls{cdhs}i tarkvara pilt.
+Selleks muudab toitesüsteem signaali CDHS\_FIRM väärtust, mille alglaadur saab
+teada lugedes vastavat sisendviiku.
 
 \subsubsection{Kahe mikrokontrolleri toetamine}
-Alglaadur peab töötama nii STM32F103l, mis on CDHSil, kui ka
-STM32F217l, mis on CAMil.
+Alglaadur peab töötama nii STM32F103l, mis on \gls{cdhs}il, kui ka
+STM32F217l, mis on \gls{cam}il.
 
 \subsection{Kasutuslood}
-Siin on esitatud esialgsed kasutuslood, mis on töö autorile ette anti.
+Siin on esitatud esialgsed kasutuslood, mille sarnaselt nõuetele on kirjutatud
+,,tellija'' ehk CDHSi peaarendaja, Indrek Sünter.
 \subsubsection{Tavapärane alglaadimine}
 \label{sec:usecase:default}
 \begin{enumerate}
@@ -298,7 +320,7 @@ Siin on esitatud esialgsed kasutuslood, mis on töö autorile ette anti.
 	\item Kõik lisaseadmed ja riistvaramoodulid lülitatakse välja.
 	\item Kõik viigud seatakse analoogsisendiks.
 	\item Valvekoera taimer (\textit{Watchdog Timer}) seadistatakse.
-	\item Lihtsad \iic FRAMi ajurid laetakse.
+	\item Lihtsad \gls{i2c} \gls{fram}i ajurid laetakse.
 	\item Kontrollsumma moodul seadistatakse.
 	\item Südamelöögi signaal seadistatakse.
 	\item Alglaadur kontrollib iseenda kontrollsummat.
@@ -312,7 +334,7 @@ Siin on esitatud esialgsed kasutuslood, mis on töö autorile ette anti.
 \subsubsection{CDHSi tarkvara uuendamine}
 \label{sec:usecase:upgrade}
 \begin{enumerate}
-	\item Uue tarkvara pilt hoiustatakse välises FRAMis ning CDHS
+	\item Uue tarkvara pilt hoiustatakse välises \gls{fram}is ning CDHS
 		taaskäivitatakse koos
 		\begin{enumerate}
 			\item käsuga alglaadurile, et kopeerida see mikrokontrolleri
@@ -320,7 +342,7 @@ Siin on esitatud esialgsed kasutuslood, mis on töö autorile ette anti.
 		\end{enumerate}
 	\item Alglaadur võtab esimese käsu ja täidab selle.
 		\begin{enumerate}
-			\item Käsuks on kopeerida tarkvara pilt välimisest FRAMi pesast \(X\)
+			\item Käsuks on kopeerida tarkvara pilt välimisest \gls{fram}i pesast \(X\)
 				sisemisse välkmälu pessa \(Y\).
 				\begin{enumerate}
 					\item Arvutatakse pesas \(X\) oleva pildi kontrollsumma ja
@@ -340,12 +362,12 @@ Siin on esitatud esialgsed kasutuslood, mis on töö autorile ette anti.
 \label{sec:usecase:framerror}
 \begin{enumerate}
 	\item Alglaadur käivitatakse koos käsuga kopeerida tarkvara pilt välisest
-		FRAMist.
-	\item Alglaadur üritab lugeda välisest FRAMist.
+		\gls{fram}ist.
+	\item Alglaadur üritab lugeda välisest \gls{fram}ist.
 		\begin{enumerate}
-		\item Oletame, et FRAM ei vasta, või \iic andmesiin on hõivatud.
+		\item Oletame, et \gls{fram} ei vasta, või \gls{i2c} andmesiin on hõivatud.
 		\end{enumerate}
-	\item \iic viga logitakse.
+	\item \gls{i2c} viga logitakse.
 	\item Käskude nimekiri tühjendatakse.
 	\item Alglaadur alglaeb vaikimisi pesas oleva tarkvara.
 \end{enumerate}
@@ -432,51 +454,51 @@ Nagu peaaegu igale tarkvaraprojektile kohaselt, muutusid ka selle projekti
 käigus nõuded. Aga seda peamiselt seetõttu, et esialgsete nõuete koostamisel ei
 oldud teadlikult väga põhjalik ja esialgsed nõuded jätsid päris mitmed
 detailid lahtiseks. Samuti on vasturääkivusi esitatud kasutuslugudes.
-
-Kokkuvõtvalt sündisid konkreetsed tehnilised lahendused ikkagi töö käigus. Antud
-nõuded ja kasutuslood olid küll suuna näitajateks, kuid neid ei võetud rangete
-reeglitena, sest nende tegelik eesmärk oli lihtsalt midagi kirja panna, et
-hakkaks moodustuma tervikpilt.
+Kokkuvõtvalt sündisid konkreetsed tehnilised lahendused ikkagi töö käigus.
 
 \subsubsection{Töö käigus tekkinud täpsustused}
-Käskude nimekirja hoidmiseks valiti väline FRAM, sest see tundus kõige
+Käskude nimekirja hoidmiseks valiti väline \gls{fram}, sest see tundus kõige
 turvalisem, sest ta on radiatsioonikindlam kui välkmälu ja kui peaks juhtuma, et
-välise FRAMiga ei saa suhelda, siis nagunii pole alglaaduril võimalik tarkvara
-kopeerida ning tarkvarapildi valimiseks saab kasutada ka toitesüsteemi, mis
-muudab FIRMW viigule mineva signaali väärtust.
+välise \gls{fram}iga ei saa suhelda, siis nagunii pole alglaaduril võimalik
+tarkvara kopeerida ning tarkvarapildi valimiseks saab kasutada ka toitesüsteemi,
+mis muudab FIRMW viigule mineva signaali väärtust.
 
-Samuti otsutati, et ka kopeerimine toimub just FRAMist sisemisse välkmälusse,
-sest nii on alglaaduri keerukus väiksem, sest pole vaja eraldi suhtlust välise
-välkmäluge, mis oli alternatiivne koht tarkvara piltide hoiustamiseks. 
+Samuti otsutati, et ka kopeerimine toimub just \gls{fram}ist sisemisse
+välkmälusse, sest nii on alglaaduri keerukus väiksem, sest pole vaja eraldi
+suhtlust välise välkmäluga, mis oli alternatiivne koht tarkvara piltide
+hoiustamiseks.
 
-Algselt leiti ka veel seda, et nii CAMil kui ka CDHSil on \iic siinil olev FRAM.
-See tähendas, et oli vaja implementeerida ainult \iic suhtlus. Hiljem aga tehti
-avastus, et CDHSil \iic andmesiinil olev FRAM on liiga väike, et seal tarkvara
-pilte hoida. Seetõttu tuli implementeerida ka SPI siinil suhtlus FRAMiga, sest
-CDHSi peal oli SPI siinil piisava suurusega FRAM. Teisest küljest CAMil ei ole
-SPI siinil asuvat FRAMi ja seega CAMil kasutatakse \iic siinil olevat FRAMi.
+Algselt leiti ka veel seda, et nii \gls{cam}il kui ka \gls{cdhs}il on \gls{i2c}
+siinil olev \gls{fram}.  See tähendas, et oli vaja implementeerida ainult
+\gls{i2c} suhtlus. Hiljem aga tehti avastus, et \gls{cdhs}il \gls{i2c}
+andmesiinil olev \gls{fram} on liiga väike, et seal tarkvara pilte hoida.
+Seetõttu tuli implementeerida ka \gls{spi} siinil suhtlus \gls{fram}iga, sest
+\gls{cdhs}i peal oli \gls{spi} siinil piisava suurusega \gls{fram}. Teisest
+küljest \gls{cam}il ei ole \gls{spi} siinil asuvat \gls{fram}i ja seega
+\gls{cam}il kasutatakse \gls{i2c} siinil olevat \gls{fram}i.
 
 \subsubsection{Kasutuslugude muutused}
-Kasutusloos~,,\ref{sec:usecase:default}~\nameref{sec:usecase:default}'' pole vaja
-teha kahte esimest tegevust, sest pärast mikrokontrolleri resetti on niigi kõik
-lisaseadmed väljalülitatud ja enamik sisend/väljund viikudest on seadistatud
-analoogsisendiks\cite{f1rm,f2rm}. Lisaks sellele leiti töö käigus, et sisemist
-valvekoera taimerit ei peaks kasutatama, sest kui CDHSi tarkvara kokku jookseb,
-teeb valvekoer mikrokontrollerile taaskäivituse, siis jookseb tarkvara uuesti
-kokku ja asi jääb tsüklisse. Kui nüüd selle tsükli käigus ka südamelöögi
-signaali genereeritakse, siis ei saaks toitesüsteem probleemist teada ja ei
-oskaks ümber lülitada teisele tarkvara pesale või CDHSi puhul teisele
-mikrokontrollerile. Samuti on ka neljas punkt natuke vale, sest CDHSil saab
-FRAMile ligi \iic asemel üle SPI andmesiini.
+Kasutusloos~,,\ref{sec:usecase:default}~\nameref{sec:usecase:default}'' pole
+vaja teha kahte esimest tegevust, sest pärast mikrokontrolleri resetti on niigi
+kõik lisaseadmed väljalülitatud ja enamik sisend/väljund viikudest on
+seadistatud analoogsisendiks\cite{f1rm,f2rm}. Lisaks sellele leiti töö käigus,
+et sisemist valvekoera taimerit ei peaks kasutatama, sest kui \gls{cdhs}i
+tarkvara kokku jookseb, teeb valvekoer mikrokontrollerile taaskäivituse, siis
+jookseb tarkvara uuesti kokku ja asi jääb tsüklisse. Kui nüüd selle tsükli
+käigus ka südamelöögi signaali genereeritakse, siis ei saaks toitesüsteem
+probleemist teada ja ei oskaks ümber lülitada teisele tarkvara pesale või
+\gls{cdhs}i puhul teisele mikrokontrollerile. Samuti on ka neljas punkt natuke
+vale, sest \gls{cdhs}il saab \gls{fram}ile ligi \gls{i2c} asemel üle \gls{spi}
+andmesiini.
 
-Kasutusloos~,,\ref{sec:usecase:upgrade}~\nameref{sec:usecase:upgrade}'' ei ole vaja
-Välimises FRAMis kindlat pesa määrata, vaid selle asemel kasutatakse otseselt
-mäluaadressi, millelt tarkvara pilt leitakse. 
+Kasutusloos~,,\ref{sec:usecase:upgrade}~\nameref{sec:usecase:upgrade}'' ei ole
+vaja välimises \gls{fram}is kindlat pesa määrata, vaid selle asemel kasutatakse
+otseselt mäluaadressi, millelt tarkvara pilt leitakse.
 
 Kasutuslugu~,,\ref{sec:usecase:framerror}~\nameref{sec:usecase:framerror}''
-tuleb ka muuta, sest FRAM ei pruugi alati olla \iic siinil ning enne
-kopeerimise käsku tuleb FRAMist lugeda käskude nimekiri. Samuti käskude
-nimekirja kustutamiseks on vaja FRAMi kirjutada.
+tuleb ka muuta, sest \gls{fram} ei pruugi alati olla \gls{i2c} siinil ning enne
+kopeerimise käsku tuleb \gls{fram}ist lugeda käskude nimekiri. Samuti käskude
+nimekirja kustutamiseks on vaja \gls{fram}i kirjutada.
 
 Kasutusloo~,,\ref{sec:usecase:fwselect}~\nameref{sec:usecase:fwselect}'' puhul
 tehtud muudatus on selline, et käskude nimekiri ei pea olema tühi. Lihtsalt iga
@@ -488,16 +510,15 @@ nimetus: sekundaarne pesa.
 \label{sec:boot}
 \subsection{Tavapärane alglaadimisprotseduur}
 \label{sec:boot:tava}
-Kui mikrokontrolleril toide olemas on üritab see ennast tööle panna.
-Esmalt lülitatakse sisse sisemine 8-MHz-ne ossillaator, mille signaali
-neljandal tõusval frondil loetakse konfigureerimise viikude väärtused. Nende
-väärtuste põhjal otsustatakse, millisest kohast alglaadida. Võimalikud
-variandid on: põhi välkmälu, süsteemi mälu ja staatiline juhupöördlusega
-mälu(SRAM).  Enim kasutatakse kahte esimest: põhi välkmälu seal oleva programmi
-käivitamiseks ja süsteemi mälu, et põhimälu muuta. Tehases paigaldatakse
-süsteemi mällu, mis on tegelikult lihtsalt üks kaitstud osa põhi välkmälu
-lõpust, alglaadur, mille abil saab programmeerida ülejäänud välkmälu ehk oma
-programmi mikrokontrollerile laadida.
+Kui mikrokontrolleril toide olemas on, üritab see ennast tööle panna. Esmalt
+lülitatakse sisse sisemine 8-MHz-ne ossillaator, mille signaali neljandal
+tõusval frondil loetakse konfigureerimise viikude väärtused. Nende väärtuste
+põhjal otsustatakse, millisest kohast alglaadida. Võimalikud variandid on: põhi
+välkmälu, süsteemi mälu ja staatiline juhupöördlusega mälu(\gls{sram}). Enim
+kasutatakse kahte esimest: põhi välkmälu seal oleva programmi käivitamiseks ja
+süsteemi mälu. Tehases paigaldatakse süsteemi mällu, mis on tegelikult lihtsalt
+üks kaitstud osa põhi välkmälu lõpust, alglaadur, mille abil saab programmeerida
+ülejäänud välkmälu ehk oma programmi mikrokontrollerile laadida.
 
 Oletades, et programm on juba kiibi välkmälus olemas ja alglaadimist
 alustatakse põhi välkmälust, vaatleme edasist protsessi. Välkmälu aadress on
@@ -508,18 +529,18 @@ alustatakse instruktsioonide täitmist lähtestamise vektorist, mille
 algusaadress on kirjas aadressil 0x0000 0004. \cite{f1rm}
 
 Lähtestamise vektoril on tavaliselt assembleris kirjutatud protseduur, mis
-kopeerib programmi andmete sektsiooni välkmälust SRAMi, täidab ülejäänud
-programmi jaoks vajaliku ala SRAMist nullidega, kutsub välja C koodis kirjutatud
-protseduuri, mis initsialiseerib süsteemi kella, ja siis annab juhtimise üle C
-koodis kirjutatud \textit{main} protseduurile. Satelliidi peal ei kasutata
-üldist kella seadmise koodi ja seega see samm jäetakse vahele ning kella
-seadmine kutsutakse välja \textit{main}ist.
+kopeerib programmi andmete sektsiooni välkmälust \gls{sram}i, täidab ülejäänud
+programmi jaoks vajaliku ala \gls{sram}ist nullidega, kutsub välja C koodis
+kirjutatud protseduuri, mis initsialiseerib süsteemi kella, ja siis annab
+juhtimise üle C koodis kirjutatud \textit{main} protseduurile. Satelliidi peal
+ei kasutata üldist kella seadmise koodi ja seega see samm jäetakse vahele ning
+kella seadmine kutsutakse välja \textit{main}ist.
 
 See, mida tarkvara edasi initsialiseerib, on juba tarkvara spetsiifiline.
 Tõenäoliselt initsialiseeritakse mõned riistvaralised moodulid näiteks USART või
-SPI ja hakatakse siis rakendusele vajalikku kontrolltsüklit täitma. Satelliidil
-Estcube-1 kasutatakse nii CAMil kui ka CDHSil reaalaja operatsioonisüsteemi
-FreeRTOS.
+\gls{spi} ja hakatakse siis rakendusele vajalikku kontrolltsüklit täitma.
+Satelliidil Estcube-1 kasutatakse nii \gls{cam}il kui ka \gls{cdhs}il
+põhitarkvara osana reaalaja operatsioonisüsteemi FreeRTOS.
 
 \subsection{Programmi alglaadimine koos alglaaduriga}
 Alglaadur ise käitub alglaadimise seisukohalt nagu iga teinegi programm ja
@@ -531,17 +552,19 @@ tähendab, et tegelik põhiprogramm peab nüüd asuma kusagil mujal kui välkmä
 alguses ja sellega peab arvestama põhiprogrammi linkimisel.
 
 Kui alglaadur on oma muud ülesanded juba täitnud, on tema viimaseks tööks
-põhitarkvara käivitamine. Selleks käitub sarnaselt protsessoriga, kuid
-kõigepealt on tal vaja teada, mis aadressil põhitarkvara katkestusvektorite
+põhitarkvara käivitamine. Selleks jäljendab alglaadur protsessori käitumist,
+kuid kõigepealt on tal vaja teada, mis aadressil põhitarkvara katkestusvektorite
 tabel asub. See aadress on aga eelnevalt kokkulepitud ja sissekodeeritud.
 
 Enne põhitarkvara töölepanemist tuleks puhtaks teha pinu. Alglaaduri enda töö
-ajal sinna salvestatud väärtusi pole põhiprogrammil kohe kuidagi vaja. Pinu
-puhtaks tegemine tähendab lihtsalt pinu viida algväärtustamist, sest nii
-hakatakse edaspidi pinus juba olevaid andmeid üle kirjutama ja kui programm on
-korrektne, siis midagi sellist ei loeta, mida programm ise pole juba üle
-kirjutanud. Algväärtustamiseks kasutatakse põhitarkvara katkestusvektorite
-tabeli esimest elementi, mis näitas pinu ülemist aadressi.
+ajal sinna salvestatud väärtusi pole põhiprogrammil kohe kuidagi vaja, sest
+ideaalis ei tohiks põhiprogramm kuidagi aru saada, kas ta käivitati otse, või
+alglaaduri abiga. Pinu puhtaks tegemine tähendab lihtsalt pinu viida
+algväärtustamist, sest nii hakatakse edaspidi pinus juba olevaid andmeid üle
+kirjutama ja kui programm on korrektne, siis midagi sellist ei loeta, mida
+programm ise pole juba üle kirjutanud. Algväärtustamiseks kasutatakse
+põhitarkvara katkestusvektorite tabeli esimest elementi, mis näitab pinu ülemist
+aadressi.
 
 Kuigi mikrokontrolleri käivitamise hetkel alustatakse tööd kindlast kohast, ei
 pea terve katkestusvektorite tabel välkmälu alguses olema. Katkestustega tegeleb
@@ -549,7 +572,7 @@ eraldi riistvara moodul NVIC (\textit{Nested Vectored Interrupt Controller}).
 Lisaks on sellega tihedalt seotud teine moodul SCB (\textit{System Control
 Block}), kus asub seadistatav register VTOR (\textit{Vector Table Offset
 Register}), mille väärtust kasutatakse katkestusvektorite tabeli aadressina.
-\cite[ptk~4.4]{CM3pm} Vaikimisi on seal väärtus 0x0000 0000, mida kasutatakse alglaaduri
+\cite{CM3pm} Vaikimisi on seal väärtus 0x0000 0000, mida kasutatakse alglaaduri
 laadimiseks, kuid alglaadur seab selleks väärtuseks põhiprogrammi
 katkestusvektorite tabeli aadressi. Kui seda ei seadistataks, siis kutsutaks
 põhiprogrammi katkestuse ajal välja alglaaduri katkestusvektoreid, mis on
@@ -559,16 +582,17 @@ teenindamise rutiin lihtsalt lõputu tsükkel, seega jääks kontroller katkestu
 kinni ja halvatud ei oleks ainult põhitarkvara katkestuse teenindamine vaid kogu
 põhitarkvara töö peatuks.
 
-Kui pinu viit ja katkestusvektorite tabeli asukoht on ära seadistatud jääb üle
+Kui pinu viit ja katkestusvektorite tabeli asukoht on ära seadistatud, jääb üle
 veel lugeda katkestusvektorite tabelist põhiprogrammi lähtestamise vektori
 aadress ja mikrokontrolleri töö sinna edasi juhtida. Selleks tehakse C-koodis
 funktsiooni viit, mis väärtustatakse lähtestamise vektori aadressiga ning
-seejärel kutsutakse see välja.
+seejärel kutsutakse see välja. Siit edasi on juhtimine juba alglaetava tarkvara
+käes, ja alglaadur ei tee enam midagi.
 
 Edasine toimub sarnane tegevus nagu tavapärase alglaadimise juures, kus
 lähtestamise vektoril olev kood kopeerib välkmälus oleva põhiprogrammi andmete
-sekstsiooni SRAMi, tähendab SRAMi initsialiseerimata andmete jaoks ja seejärel
-kutsub välja põhitarkvara \textit{main} protseduuri.
+sektsiooni \gls{sram}i, tühjendab \gls{sram}i initsialiseerimata andmete jaoks
+ja seejärel kutsub välja põhitarkvara \textit{main} protseduuri.
 
 
 \subsection{Programmi ettevalmistamine}
@@ -605,10 +629,11 @@ sellepärast, et selline on välkmälu kustutatud asendis, ja nii on võimalik s
 üle programmeerida ilma tervet sektorit eelnevalt kustutamata.
 
 \subsection{Tarkvara pildi päis}
+\label{sec:impl:header}
 Tarkvara pilti võib vaadelda, kui lihtsalt ühte suurt kogu andmeid, mille
 alguses on katkestusvektorite tabel. Alglaaduri seisukohast oleks vajalik, et
 oleks teada ka nende andmete pikkus ja kontrollsumma. Selleks lisatakse
-tarkvarapildi ette nii FRAMis kui ka välkmälus pisike päis, kus on kolm 32
+tarkvarapildi ette nii \gls{fram}is kui ka välkmälus pisike päis, kus on kolm 32
 bitist välja: suurus, versioon ja kontrollsumma. Versioonivälja alglaadur ise
 kunagi ei puutu, aga põhitarkvara ise võib sellest kasu saada, et
 versiooninumber on ka olemas.
@@ -630,17 +655,17 @@ sest katesktusvektorite tabel on fikseeritud pikkusega, kuid see oleks rohkem
 tööd võtnud ja samuti oleks siis pidanud eraldi arvutama kontrollsumma
 katkestusvektorite tabelist ja ülejäänud osast, mis jääks teisele poole päist.
 
-Tarkvarapilt koos päise ja polsterdusega on ühesugune nii FRAMis kui ka
-välkmälus, kuigi FRAMis pole seda polsterdust vaja. Tarkvara kontrollsumma
+Tarkvarapilt koos päise ja polsterdusega on ühesugune nii \gls{fram}is kui ka
+välkmälus, kuigi \gls{fram}is pole seda polsterdust vaja. Tarkvara kontrollsumma
 arvutamisel ei arvutata sisse päist ega polsterdust. Samas saab kasutada seda
 polsterdust, et seal veel mingeid metaandmeid tarkvara pildi kohta hoida, sest ka
-see polsterdust kopeeritakse alglaaduri poolt kohusetundlikult FRAMist
+see polsterdust kopeeritakse alglaaduri poolt kohusetundlikult \gls{fram}ist
 välkmällu.
 
 \subsection{Käskude nimekiri}
-Käskude nimekiri asub FRAMis. Kasutades alglaaduri abiteeki saab sinna kirjutada
+Käskude nimekiri asub \gls{fram}is. Kasutades alglaaduri abiteeki saab sinna kirjutada
 maksimaalselt 3 käsku ja valida on kahe käsutüübi vahel: kopeerimine või
-alglaadimine. Iga käsk koos oma parameetritega kirjutatakse FRAMi kahekordselt,
+alglaadimine. Iga käsk koos oma parameetritega kirjutatakse \gls{fram}i kahekordselt,
 kusjuures teine kord on kõik bitid inverteeritud. 
 
 Et vältida vanade käskude nimekirja sattumist, kirjutatakse iga käsu lõppu veel
@@ -653,7 +678,7 @@ Käskude nimekirja tühendamine tähendab lihtsalt maksimaalse suurusega alale
 käskude nimekiri oli tühi või lihtsalt esimene bait nimekirjas oli vale.
 
 Ühe puudusena võib välja tuua selle, et käskude nimekirja lugedes ei
-kontrollita, kas on ainult kolm käsku. Ja nii saab FRAMi kirjutada ka sellise
+kontrollita, kas on ainult kolm käsku. Ja nii saab \gls{fram}i kirjutada ka sellise
 käskude nimekirja, kus on näiteks sadu kopeerimiskäske, aga see ei ole probleem,
 sest käskude nimekirja ei loeta korraga mälusse vaid täidetakse käskhaaval.
 
@@ -667,7 +692,7 @@ väärtust tuleb muuta. Ning pole oluline, kui seda tehakse liiga tihti.
 
 Viigu väärtust muudetakse vahetult enne põhitarkvara alglaadimist ja kahes
 funktsioonis, mida kasutatakse, et oodata mingite operatsioonide lõppemist.
-Nendest esimene on välkmälu operatsioonide jaoks ja teine \iic FRAMi jaoks. Siit
+Nendest esimene on välkmälu operatsioonide jaoks ja teine \gls{i2c} \gls{fram}i jaoks. Siit
 aga tuleb välja üks probleem, mis on kirjas peatükis~\ref{sec:prob:beat}. 
 
 \section{Komponendid}
@@ -683,7 +708,7 @@ platvormil, siis on platvormispetsiifilised kohad koodis kaitstud eeltöötluse
 makrodega (\textit{preproccesor macros}). Eeltöötluse jaoks defineeritakse
 sümbolid vastavalt Eclipse projektis olevale ehitamise seadistusele
 (\textit{build configuration}). See tähendab, et kompilleerides alglaadurit
-näiteks CDHSi jaoks, siis need osad koodist, mis on mõeldud ainult CAMile,
+näiteks \gls{cdhs}i jaoks, siis need osad koodist, mis on mõeldud ainult \gls{cam}ile,
 jäävad kompillaatoril nägemata, sest eeltöötluse käigus võetakse need välja.
 
 \subsubsection{Assemblery failid: \textbf{startup\_stm32fxxxx.S}}
@@ -691,7 +716,7 @@ Failid \textbf{startup\_stm32f10x\_xl.S} ja \textbf{startup\_stm32f2xx.S} on
 tegelikult peaaegu täpselt samasugused. Neid on kaks tükki, sest alglaadur peab
 töötama kahel erineval mikrokontrolleril. Neis failides on kirjas
 katkestusvektorite tabel, mis on kasutataval mikrokontrolleritel erinev. Lisaks
-sellele on neis failides see põhiline andmete SRAMi kopeerimine, SRAMi nullide
+sellele on neis failides see põhiline andmete \gls{sram}i kopeerimine, \gls{sram}i nullide
 kirjutamine ja C-koodis oleva \textit{main}i väljakutsumine, millest oli juttu
 peatükis~\ref{sec:boot:tava}.
 
@@ -734,18 +759,18 @@ lugemine tähendab lihtsalt mingilt aadressilt lugemist. Implementatsioon on
 selline, mis abstrakteerib ära mikrokontrollerite erinevused.
 
 \subsubsection{\texorpdfstring{\iic}{I2C} FRAMiga suhtlemine - \textbf{fram.c}}
-Fail implementeerib \iic suhtluse välise FRAMiga. Antud fail töötas nii CDHSil
-kui ka CAMil, kuid hiljem selgus, et CDHSi peal peab siiski kasutama SPI siinil
-olevat FRAMi. Sellest ajast on ka faili nimi lihtsalt viide mälu tüübile, kuna
-siis pidi olema kasutusel ainult \iic siinil olev FRAM.
+Fail implementeerib \gls{i2c} suhtluse välise \gls{fram}iga. Antud fail töötas nii \gls{cdhs}il
+kui ka \gls{cam}il, kuid hiljem selgus, et \gls{cdhs}i peal peab siiski kasutama \gls{spi} siinil
+olevat \gls{fram}i. Sellest ajast on ka faili nimi lihtsalt viide mälu tüübile, kuna
+siis pidi olema kasutusel ainult \gls{i2c} siinil olev \gls{fram}.
 
-Fail on kasutusel ainult CAMil.
+Fail on kasutusel ainult \gls{cam}il.
 
 \subsubsection{SPI FRAMiga suhtlemine - \textbf{fram\_spi.c}}
-Failis on implementeeritud samad funktsioonid FRAMiga suhtlemiseks, kuid seda
-üle SPI andmesiini. Kasutatud on paari kavalat võtet, et koodi mahtu vähendada.
+Failis on implementeeritud samad funktsioonid \gls{fram}iga suhtlemiseks, kuid seda
+üle \gls{spi} andmesiini. Kasutatud on paari kavalat võtet, et koodi mahtu vähendada.
 
-Fail on kasutusel ainult CDHSil.
+Fail on kasutusel ainult \gls{cdhs}il.
 
 \subsubsection{Sisend/väljund viikude seadmine - \textbf{gpio.c}}
 Antud fail lubab lisaseadmetele tööks vajaliku kellasignaali, seadistab
@@ -758,7 +783,7 @@ kuid need erinevused on ära abstrakteeritud.
 Alglaaduri logi salvestatakse ühte välkmälu lehte. Igal alglaaduri käivitamisel
 leitakse kahendotsinguga üles seal lehes koht, kuhu logi kirjutamine pooleli jäi
 ja jätkatakse sealt logi täitmist. Kui juhtub, et käivitamise hetkel on logi
-peaaegu täis, siis võetakse viimased 10 logi elementi, kopeeritakse need SRAMi,
+peaaegu täis, siis võetakse viimased 10 logi elementi, kopeeritakse need \gls{sram}i,
 kustutatakse mäluleht välkmälus ära, ja siis kirjutatakse need 10 logi elementi
 logi algusesse. Samuti on hoolitsetud selle eest, et kui isegi peaks kuidagi töö
 käigus logisse rohkem kirjutatama, kui logis ruumi on, siis jäetakse ikkagi logi
@@ -766,14 +791,14 @@ alast välkmälus väljapoole kirjutamata.
 
 \subsubsection{Alguspunkt - \textbf{main.c}}
 Siin failis asub \textit{main} protseduur, mis initsialiseerib kõigepealt
-sisend/väljund viigud, logi ja välise FRAMiga suhtlemiseks vajaliku SPI või \iic
+sisend/väljund viigud, logi ja välise \gls{fram}iga suhtlemiseks vajaliku \gls{spi} või \gls{i2c}
 mooduli. Seejärel kontrollib ta alglaaduri enda kontrollsummat. Pärast mida
 täidab ta käskude nimekirjas olevad käsud ja lõpetuseks teeb vaikimisi
 alglaadimise.
 
 \subsubsection{Testid - \textbf{tests.c}}
 Siin failis on mõned funktsioonid, mida kasutati testimisel, kuid alglaaduris
-neid tegelikult vaja ei ole. Siin on kood FRAMist kirjutamise ja lugemise
+neid tegelikult vaja ei ole. Siin on kood \gls{fram}ist kirjutamise ja lugemise
 testimiseks, logisse kirjutamiseks ning käskude nimekirja testkäskude
 panemiseks.
 
@@ -793,8 +818,8 @@ nimekirja kontrollimiseks ja alglaadur ise käskude täitmiseks, siis koodi
 duplitseerimise asemel kasutab alglaadur ise ka seda abiteeki.
 
 Abiteegis on funktsioonid käskude nimekirja lugemiseks ja muutmiseks. Kuna
-käskude nimekiri asub välimises FRAMis, millele saab ligi üle \iic siini, siis
-on abiteegil vaja funktsioone, et FRAMi lugeda ja kirjutada. Samas on teada, et
+käskude nimekiri asub välimises \gls{fram}is, millele saab ligi üle \gls{i2c} siini, siis
+on abiteegil vaja funktsioone, et \gls{fram}i lugeda ja kirjutada. Samas on teada, et
 nii alglaaduris kui ka põhitarkvaras, mis mõlemad abiteeki kasutavad, on olemas
 juba funktsioonid selle jaoks. Seega on mõistlik kasutada juba olemasolevaid
 funktsioone ka abiteegis. Levinud viis on selleks kasutada funktsiooniviitasid,
@@ -806,13 +831,14 @@ implementatsiooni ei leita, siis annab linkija veateate.
 
 \section{Töö käik}
 Esimesed läbirääkimised projekti osas toimusid oktoobris, kuid praktiline pool
-sai hoo sisse alles novembris. Esimese asjana nagu manussüsteemide
+sai hoo sisse alles novembri lõpus. Esimese asjana nagu manussüsteemide
 programmeerimisel ikka, sai tehtud programm, mis vilgutab indikaatortulukest.
 Kui mikrokontrolleril juba tulukesed vilkuma said, oli järgmiseks alglaaduri
-põhifunktsionaalsus - teise programmi alglaadimine. todo: jätkata seda kirjeldust
-natuke.
+põhifunktsionaalsus - teise programmi alglaadimine. Detsembri lõpuks oli
+alglaadur implementeeritud.
 
 \subsection{Suurimad probleemid}
+Siin peatükis on väljatoodud mõned enim aega kulutanud probleemid.
 \subsubsection{Viga päises}
 Mikrokontrolleri riitvaraga suhtlemine käib läbi kontroll- ja staatusregistrite,
 mis asuvad lihtsalt kusagil programmi aadressiruumis. Lihtsustamaks nendega
@@ -823,40 +849,44 @@ muudab ka kirjutatava koodi loetavamaks.
 
 Töö autor kopeeris alglaaduri jaoks need registrite nimesid ja aadresse siduvad
 päisfailid ühest STMicroelectronicsi näidisprojektist. Testides ja
-implementeerides \iic suhtlust CAMi prototüübil, tekkis probleem, et asi
+implementeerides \gls{i2c} suhtlust \gls{cam}i prototüübil, tekkis probleem, et asi
 lihtsalt ei töödanud. Pärast mitmeid tunde vea otsimist leiti, et
-sisend/väljund viigud ei ole õigesti seadistatud, et \iic moodul saaks neid
+sisend/väljund viigud ei ole õigesti seadistatud, et \gls{i2c} moodul saaks neid
 kasutada. Kui kõik teised veakohad olid välistatud, avastati vea tegelik põhjus.
 Nimelt oli viga tootja poolt tehtud päises. Viikude seadmistamisega
 riistvaramoodulile seotud registrile vahetult eelneva registri suurus oli päises
 32 bitti, kuid manuaalis oli kirjas, et see on 16bitine register. See tähendas,
 et vajalikust registrist kirjutati 16 biti võrra mööda. 
 \subsubsection{\textit{Chip Write Enable}}
-Kui \iic suhtlus CAMi prototüübil toimima saadi ja suhtlus FRAMiga toimus, siis
-asuti seda sama tegema ka CDHSi plaadil. Riistvaraline \iic moodul ise oli küll
+Kui \gls{i2c} suhtlus \gls{cam}i prototüübil toimima saadi ja suhtlus \gls{fram}iga toimus, siis
+asuti seda sama tegema ka \gls{cdhs}i plaadil. Riistvaraline \gls{i2c} moodul ise oli küll
 samasugune, aga sisend/väljund viikude seadistamine oli natuke erinev. Tundus
-nagu asi töötaks, aga FRAMi kirjutades ja siis lugedes ei olnud tagasiloetavad
+nagu asi töötaks, aga \gls{fram}i kirjutades ja siis lugedes ei olnud tagasiloetavad
 andmed samad, mis sinna kirjutati.
 
 Tagantjärele oli vea põhjus suhteliselt ilmne, kuid sellegipoolest kulus palju
-aega enne, kui veale jällile jõuti. Nimelt oli kasutataval FRAMi kiibil eraldi
-jalg, mis pidi olemas kindlas asendis, et FRAMi kirjutamine töötaks. CAMi
-plaadil oli see jalg jäädavalt õigesse asendis, aga CDHSi peal oli see viik
+aega enne, kui veale jällile jõuti. Nimelt oli kasutataval \gls{fram}i kiibil eraldi
+jalg, mis pidi olemas kindlas asendis, et \gls{fram}i kirjutamine töötaks. \gls{cam}i
+plaadil oli see jalg jäädavalt õigesse asendis, aga \gls{cdhs}i peal oli see viik
 ühendatud mikrokontrolleri viigu külge ja nii pidi tarkvara selle viigu enne
-kirjutamist FRAMi õigesse asendisse panema.
+kirjutamist \gls{fram}i õigesse asendisse panema.
 
 \subsubsection{\textit{SPI slave select}}
-Kui selgus, et siiski on vaja CDHSi peal kasutada SPI siinil olevat FRAMi,
+Kui selgus, et siiski on vaja \gls{cdhs}i peal kasutada \gls{spi} siinil olevat \gls{fram}i,
 esines ka selle implementeerimisel üks rohkem silumiseks aega võtnud probleem.
 Kuna töö autorile öeldi ainult alglaaduri tööks vajaminevate asjade kohta, siis
-jäi SPI siinil olevate teiste seadmete \textit{slave select} viigud
-seadistamata. Ossilosgraafiga SPI suhtlust vaadates leiti, et tagasitulevad
+jäi \gls{spi} siinil olevate teiste seadmete \textit{slave select} viigud
+seadistamata. Ossilosgraafiga \gls{spi} suhtlust vaadates leiti, et tagasitulevad
 andmed on küll väga imelikud, kuid neis on mingi loogiline struktuur. Tuli
-välja, et SPI siinil olev reaalajakell üritas samal ajal koos FRAMiga andmeid
-tagastada. Probleemi lahendus oli jällegi lihtne: määrati kõigi SPI siinil
+välja, et \gls{spi} siinil olev reaalajakell üritas samal ajal koos \gls{fram}iga andmeid
+tagastada. Probleemi lahendus oli jällegi lihtne: määrati kõigi \gls{spi} siinil
 olevate seadmete valimise viigud mitteaktiivseks. Ja alglaaduri töö ajal muudeti
-ainult FRAMiga suhtlemise ajaks FRAMile vastavat seadme valimise viigu väljundit.
+ainult \gls{fram}iga suhtlemise ajaks \gls{fram}ile vastavat seadme valimise viigu väljundit.
 
+\subsection{Testimine}
+Testimiseks ja silumiseks kasutati mikrokontrolleril olevat silumise süsteemi,
+millega suheldi kasutades JTAGi\cite{jtag}.
+todo: siia natuke rohkem kirjutada
 \section{Teadaolevad vead}
 Käesoleva dokumendi kirjutamise ajal on Estcube-1 juba Maa orbiidil ja enam ei
 jää üle muud, kui vead lihtsalt dokumenteerida.
@@ -867,19 +897,19 @@ suurus on 0xFFFF FFFF baiti ja hakkab seda arvutama. Tegelikult tuleks
 fontrollida, et tarkvara oleks mõistlikku pikkusega. Sobivaks maksimumiks oleks
 näiteks tarkvarapesa maksimaalne pikkus.
 
-Sama probleem esineb ka siis, kui enne FRAMist välkmällu kopeerimist hakatakse
-kontrollima FRAMis oleva tarkvara pildi kontrollsummat.
+Sama probleem esineb ka siis, kui enne \gls{fram}ist välkmällu kopeerimist hakatakse
+kontrollima \gls{fram}is oleva tarkvara pildi kontrollsummat.
 
 \subsection{Südamelöögi genereerimine}
 Südamelöögi genereerimisel on tegelikult kaks probleemi, millest esimene on küll
-lihtne lohakusviga. Nimelt jäi CAMi versioonil südamelöögi signaali
-genereerimiseks kasutataval funktsiooni keha tühjaks. Seega CAMi peal alglaadur
+lihtne lohakusviga. Nimelt jäi \gls{cam}i versioonil südamelöögi signaali
+genereerimiseks kasutataval funktsiooni keha tühjaks. Seega \gls{cam}i peal alglaadur
 ei genereeri ühtegi lööki.
 
-Teine probleem tulenes sellest, et suhteliselt lõppfaasis oli vaja CDHSi peal FRAMiga
-suhtlus ümber teha SPI andmesiini peale. Ja nii jäi sinna südamelöögi signaali
+Teine probleem tulenes sellest, et suhteliselt lõppfaasis oli vaja \gls{cdhs}i peal \gls{fram}iga
+suhtlus ümber teha \gls{spi} andmesiini peale. Ja nii jäi sinna südamelöögi signaali
 genereerimine lisamata. See võib olla probleem, kui näiteks kopeerimise käsu
-ajal kõigepealt välises FRAMis oleva tarkvara pildi kontrollsummat arvutatakse
+ajal kõigepealt välises \gls{fram}is oleva tarkvara pildi kontrollsummat arvutatakse
 ja selle vältel ühtegi südamelöögi signaali ei genereerita. Aga on võimalik, et
 see ajavahemik pole nii pikk, et toitesüsteem selle peale taaskäivituse teeks.
 
@@ -899,6 +929,11 @@ ajal ise need aadressid siis vastavalt programmi asukohale transleerida. See
 võimaldaks selle, et üks satelliidile üleslaetud tarkvara pilt oleks kasutatav
 nii sisemise välkmälu primaarses kui ka sekundaarses pesas.
 
+\subsection{Polsterduse eemaldamine}
+Peatükis~\ref{sec:impl:header} sai mainitud, et tegeliku tarkvara pildi ja päise
+vahel on 500 baiti polsterdust, mis raiskab mäluseadmetes ruumi. Üldiselt võiks
+sellest lahti saada.
+
 \section{Kokkuvõte}
 todo: kirjuta kokkuvõte
 \section*{Bootloader for Estcube-1 Command and Data Handling System and Camera module}
@@ -908,11 +943,12 @@ todo: kirjuta kokkuvõte
 Karl Tarbe\\
 Summary
 \end{center}
+todo: write summary
 
 \section*{Tänusõnad}
 \addcontentsline{toc}{section}{Tänusõnad}
 Indrek Sünter oli see inimene, kes oli autori kontaktisik satelliidi meeskonnas.
-Tema tegeles CDHSi põhitarkvara kirjutamisega ja seega oli tema põhiline
+Tema tegeles \gls{cdhs}i põhitarkvara kirjutamisega ja seega oli tema põhiline
 ,,klient'', kelle vajadusi alglaadur rahuldama pidi. Ta aitas arutada ja nõudeid
 paika panna, samuti luges ta elektriskeemidelt ette vajalikud sisend/väljund
 viigud ning aitas prototüüpide ühendamisel. Suured tänud talle!
@@ -956,4 +992,5 @@ Mina Karl Tarbe (sünnikuupäev: 20.02.1991)
 Tartus, \textbf{07.05.2013}
 
 
+\gls{spi}
 \end{document}
