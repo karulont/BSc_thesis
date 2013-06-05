@@ -1,9 +1,10 @@
-\documentclass[pdf,draft]{beamer}
+\documentclass[pdf]{beamer}
 \usepackage{lmodern}
 \usepackage[utf8]{inputenc}
 \usepackage[estonian]{babel}
 \usepackage{eurosym}
 \usepackage{tikz}
+\usetikzlibrary{patterns}
 
 \usetheme{Madrid}
 \setbeamertemplate{navigation symbols}{}
@@ -53,7 +54,7 @@
         \begin{column}{0.5\textwidth}
             \begin{itemize}
                 \item \textit{Command and Data Handling System} \(\to\) CDHS
-                \item STM32F103 mikrokontroller
+                \item STM32F103 mikrokontroller (ARM Cortex-M3)
                 \item Riistvaraline dubleeritus
                 \item FRAM mälud
             \end{itemize}
@@ -68,7 +69,7 @@
     \begin{columns}
         \begin{column}{0.5\textwidth}
             \begin{itemize}
-                \item STM32F217 mikrokontroller
+                \item STM32F217 mikrokontroller (ARM Cortex-M3)
                 \item 640\(\times\)480 
                 \item FRAM mälu
             \end{itemize}
@@ -83,7 +84,7 @@
     \begin{block}{Ülesanded}
         \begin{itemize}
             \item Tarkvara terviklikkuse kontrollimine
-            \item Tarkvara kopeerimine
+            \item Põhitarkvara uuendamine
             \item Põhitarkvara käivitamine
             \item Tegevuste logi salvestamine
         \end{itemize}
@@ -98,30 +99,74 @@
 
 \begin{frame}{Alglaadur - üldine vaade}
     \begin{tikzpicture}
-        %\draw (3,7) node {Mikrokontroller};
-        \draw[dashed] (0,0) rectangle (5,7)
+        \draw[dashed] (0,0) rectangle (4.5,7);
+        \draw (0.5,0.5) rectangle (4,6);
         \draw (8,0.5) rectangle (11.5,6.5);
-            (0.5,0.5) rectangle (4,6);
+        \path (0,7) -- node[above] {Mikrokontroller} (4.5,7);
+        \path (0.5,6) -- node[above] {Välkmälu} (4,6);
+        \path (8,6.5) -- node[above] {FRAM} (11.5,6.5);
+
+        \draw[pattern=north east lines] (0.5,6) rectangle 
+            node[fill=white, draw, rounded corners] {Alglaadur} 
+            (4,5);
+        \draw[pattern=north east lines] (0.5,5) rectangle
+            node[fill=white, draw, rounded corners] {\tiny Logi}
+            (4,4.5);
+        \draw[pattern=north east lines] (0.5,4.5) rectangle
+            node[fill=white, draw, rounded corners] {\small Pesa1}
+            (4,3);
+        \draw[pattern=north east lines] (0.5,3) rectangle
+            node[fill=white, draw, rounded corners] {\small Pesa2}
+            (4,1.5);
+
+        \draw[pattern=north east lines] (8,5.5) rectangle
+            node[fill=white, draw, rounded corners] {\tiny Käskude nimekiri}
+            (11.5,5);
+        \draw[pattern=north east lines] (8,4.5) rectangle
+        node[fill=white, draw, rounded corners] {\small Tarkvara tõmmis}
+            (11.5,3);
+        \draw[pattern=north east lines] (8,2.5) rectangle
+            node[fill=white, draw, rounded corners] {\small Tarkvara tõmmis}
+            (11.5,1);
+        \draw[to-to, thick] (4.5,2.6) -- (8,2.6);
+        \draw[to-to, thick] (4.5,2.8) -- (8,2.8);
+        \draw[to-to, thick] (4.5,3) -- (8,3);
+        \draw[to-to, thick] (4.5,3.2) -- node[above]{SPI/I\({}^2\)C} (8,3.2);
+
     \end{tikzpicture}
+\end{frame}
+
+\begin{frame}{Realisatsioon}
+    \begin{block}{Märksõnad}
+        \begin{itemize}
+            \item Madala taseme C
+            \item Assembler
+            \item \textit{Linker script}
+            \item Eclipse
+        \end{itemize}
+    \end{block}
 \end{frame}
 
 \begin{frame}{Mälud}
     \begin{columns}[t]
         \begin{column}{0.46\textwidth}
-            \begin{block}{FLASH}
+            \begin{block}{Välkmälu}
                 \begin{itemize}
-                    \item Asub mikrokontrolleri sees.
-                    \item Saab muuta lehe kaupa.
+                    \item Asub mikrokontrolleri sees
+                    \item Saab muuta lehe kaupa
+                    \item Laialt levinud
+                    \item Suur andmetihendus
                 \end{itemize}
             \end{block}
         \end{column}
         \begin{column}{0.46\textwidth}
             \begin{block}{\textit{Ferroelectric RAM} (FRAM)}
                 \begin{itemize}
-                    \item Ei asu mikrokontrolleris.
-                    \item Saab muuta baidi kaupa.
+                    \item Ei asu mikrokontrolleris
+                    \item Saab muuta baidi kaupa
+                    \item Vähe levinud
+                    \item Väike andmetihedus
                 \end{itemize}
-                Juurdepääs on üle SPI või I\({}^2\)C siini.
             \end{block}
         \end{column}
     \end{columns}
@@ -163,7 +208,7 @@
         \begin{enumerate}
             \item Käskude nimekirja lugemine
             \item Tarkvara terviklikkuse kontrollimine
-            \item Tegelik FLASH mälusse kirjutamine
+            \item Välkmälusse kirjutamine
         \end{enumerate}
     \end{block}
     \begin{block}{Käskude nimekiri}
@@ -174,14 +219,24 @@
     \end{block}
 \end{frame}
 
-\begin{frame}{Põhitarkvara käivitamine}
+\begin{frame}{Alglaadimine ehk põhitarkvara käivitamine}
     \begin{block}{Töö käik}
         \begin{enumerate}
             \item Tarkvara terviklikkuse kontrollimine
             \item Katkestusvektorite tabeli aadressi seadmine
             \item Stack pointeri seadmine
-            \item Lähtestamise vektorile ``hüppamine''
+            \item Lähtestamise vektorile ,,hüppamine''
         \end{enumerate}
+    \end{block}
+\end{frame}
+
+\begin{frame}{Kokkuvõte}
+    \begin{block}{Alglaaduri ülesanded}
+        \begin{itemize}
+            \item Tarkvara terviklikkuse kontrollimine: \textbf{CRC-32}
+            \item Tarkvara kopeerimine: \textbf{FRAM \(\to\) Välkmälu}
+            \item Põhitarkvara käivitamine: \textbf{Jump}
+        \end{itemize}
     \end{block}
 \end{frame}
 
@@ -189,7 +244,7 @@
     \begin{block}{Logi ülesehitus}
         \begin{itemize}
             \item Logi element on 16-bitine.
-            \item Logi asub ühes FLASH mälu lehes.
+            \item Logi asub ühes Välkmälu lehes.
             \item Kahendotsinguga leitakse logi lõpp.
             \item Logi täitumisel jäetakse alles viimased 20 sissekannet.
         \end{itemize}
@@ -199,17 +254,6 @@
             \item Logi elemendi esimene bait = tüüp.
             \item Logi elemendi teine bait = argument.
             \item Logitakse kõik vead.
-        \end{itemize}
-    \end{block}
-\end{frame}
-
-\begin{frame}{Kokkuvõte}
-    \begin{block}{Alglaaduri ülesanded}
-        \begin{itemize}
-            \item Tarkvara terviklikkuse kontrollimine: \textbf{CRC-32}
-            \item Tarkvara kopeerimine: \textbf{FRAM \(\to\) FLASH}
-            \item Põhitarkvara käivitamine: \textbf{Jump}
-            \item Tegevuste logi salvestamine: \textbf{1 leht FLASHis}
         \end{itemize}
     \end{block}
 \end{frame}
